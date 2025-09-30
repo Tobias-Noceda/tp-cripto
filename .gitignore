@@ -1,0 +1,12 @@
+obj/
+
+*.o
+*.bin
+
+*.bmp
+!*.input.bmp
+
+.idea/
+.vscode/
+
+.env
