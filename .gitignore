@@ -2,7 +2,9 @@ obj/
 
 *.o
 *.bin
+stego
 
+*.txt
 *.bmp
 !*.input.bmp
 
