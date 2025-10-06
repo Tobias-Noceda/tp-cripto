@@ -1,7 +1,13 @@
 #!/bin/bash
+img=$1
+msg=$2
+
 make DEBUG=1
 
-./bin/stego -embed -in $2 -p $1 -out out.bmp
-./bin/stego -extract -p out.bmp -out extracted.txt
+extension=${msg##*.}
 
-diff $2 extracted.txt
+./bin/stego -embed -p $img -in $msg -out out.bmp
+./bin/stego -extract -p out.bmp -out extracted
+
+echo
+diff $msg extracted.$extension
