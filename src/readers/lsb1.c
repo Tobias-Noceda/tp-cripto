@@ -5,9 +5,12 @@
 #include <errno.h>
 #include <stdbool.h>
 
-#include "../include/readers.h"
+#include <readers.h>
+#include <logs.h>
 
 #define EXTENSION_BLOCK_LENGTH 8
+
+static uint32_t get_length(FILE *file);
 
 Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
 {
@@ -25,57 +28,59 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
         return NULL;
     }
 
-    // read the first 32 bits to get the message length
-    uint32_t message_length = 0;
-    for (size_t i = 0; i < 32; i++)
+    const uint8_t message_length = get_length(file);
+    if (message_length == 0)
     {
-        int byte = fgetc(file);
-        if (byte == EOF)
-        {
-            perror("Error reading file");
-            fclose(file);
-            return NULL;
-        }
-        message_length = (message_length << 1) | (byte & 1);
+        fclose(file);
+        return NULL;
     }
 
-    printf("Message length: %u\n", message_length);
+    LOG("Message length: %u\n", message_length);
 
     // Allocate memory for the message
-    char *message = malloc(message_length);
+    uint8_t *message = malloc(message_length);
     if (message == NULL)
     {
-        perror("Memory allocation failed");
+        perror("Memory allocation for message failed");
         fclose(file);
         return NULL;
     }
 
     // Read the message bits
-    for (uint32_t i = 0; i < message_length * 8; i++)
+    for (size_t i = 0; i < message_length * 8; i++)
     {
-        int byte = fgetc(file);
+        char byte = fgetc(file);
+
         if (byte == EOF)
         {
-            perror("Error reading file");
+            perror("Not enough bytes to read message");
+
             free(message);
             fclose(file);
+
             return NULL;
         }
-        message[i / 8] = (message[i / 8] << 1) | (byte & 1);
+
+        message[i / 8] <<= 1;
+        message[i / 8] |= (byte & 1);
     }
 
-    printf("Message: %.*s\n", message_length, message);
+    LOG("Message: %.*s\n", message_length, message);
 
     Stego *stego = malloc(sizeof(Stego) + message_length);
     if (stego == NULL)
     {
         perror("Memory allocation for Stego failed");
+
         free(message);
         fclose(file);
+
         return NULL;
     }
+
     stego->size = message_length;
     memcpy(stego->data, message, message_length);
+
     free(message);
 
     if (extension != NULL)
@@ -87,11 +92,13 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
             {
                 *extension = realloc(*extension, length + EXTENSION_BLOCK_LENGTH);
             }
+
             uint8_t byte = 0;
-            for (int i = 0; i < 8; i++)
+            for (size_t i = 0; i < 8; i++)
             {
-                int image_byte = fgetc(file);
-                printf("Image byte: %02x\n", image_byte);
+                char image_byte = fgetc(file);
+                LOG("Image byte: %02x\n", image_byte);
+
                 if (image_byte == EOF)
                 {
                     perror("Error reading file");
@@ -99,13 +106,15 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
                     fclose(file);
                     return NULL;
                 }
-                byte = (byte << 1) | (image_byte & 1);
+
+                byte <<= 1;
+                byte |= image_byte & 1;
             }
 
-            printf("Extension byte: %c\n", byte);
+            LOG("Extension byte: %c\n", byte);
             (*extension)[length++] = byte;
 
-            if (byte == '\0')
+            if (!byte)
             {
                 break;
             }
@@ -114,4 +123,26 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
 
     fclose(file);
     return stego;
+}
+
+static uint32_t get_length(FILE *file)
+{
+    const size_t count = sizeof(uint32_t) * 8;
+    uint8_t img_bytes[count];
+
+    if (fread(img_bytes, 1, count, file) != count)
+    {
+        perror("Not enough bytes to read length");
+        return 0;
+    }
+
+    uint32_t message_length = 0;
+    for (size_t i = 0; i < count; i++)
+    {
+        uint8_t byte = img_bytes[i];
+        message_length <<= 1;
+        message_length |= byte & 1;
+    }
+
+    return message_length;
 }
