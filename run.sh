@@ -1,4 +1,4 @@
 #!/bin/bash
-gcc -o stego src/writers/* src/readers/* src/stego.c -lssl -lcrypto
+make DEBUG=1
 
-./stego -embed -in hello.txt -p mesi.bmp -out out.bmp
+./bin/stego -embed -in hello.txt -p mesi.bmp -out out.bmp
