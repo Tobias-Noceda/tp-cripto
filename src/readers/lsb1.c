@@ -102,7 +102,7 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
                 byte = (byte << 1) | (image_byte & 1);
             }
             printf("Extension byte: %c\n", byte);
-            *extension[length++] = byte;
+            (*extension)[length++] = byte;
 
             if (byte == '\0')
             {

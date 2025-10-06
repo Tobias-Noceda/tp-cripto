@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
                 free(extension);
                 return EXIT_FAILURE;
             }
-            sprintf(full_output_file_name, "%s.%s", output_file_name, extension);
+            sprintf(full_output_file_name, "%s%s", output_file_name, extension);
         }
         else
         {
