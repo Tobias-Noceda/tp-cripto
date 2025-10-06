@@ -6,6 +6,8 @@
 #include "include/readers.h"
 #include "include/writers.h"
 
+#define BMP_HEADER_SIZE 128
+
 int main(int argc, char *argv[]) {
 
     const char *input_file_name = NULL;
@@ -57,8 +59,8 @@ int main(int argc, char *argv[]) {
         fclose(porter);
         return EXIT_FAILURE;
     }
-    
-    fseek(porter, 128, SEEK_SET); // Skip BMP header
+
+    fseek(porter, BMP_HEADER_SIZE, SEEK_SET); // Skip BMP header
 
     // turn the size into 4 bytes
     uint8_t size_bytes[4];

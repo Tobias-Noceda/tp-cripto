@@ -4,7 +4,13 @@ size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
 {
     size *= 8;
 
-    uint8_t data[size];
+    uint8_t *data = malloc(size);
+    if (data == NULL)
+    {
+        perror("Memory allocation failed");
+        return 0;
+    }
+    
     if (fread(data, 1, size, output) != size)
     {
         if (feof(output))
@@ -16,6 +22,7 @@ size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
             perror("Error reading output file");
         }
 
+        free(data);
         return 0;
     }
     fseek(output, -size, SEEK_CUR);
@@ -36,5 +43,8 @@ size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
         }
     }
 
-    return fwrite(data, 1, size, output);
+    size_t written = fwrite(data, 1, size, output);
+    free(data);
+
+    return written;
 }
