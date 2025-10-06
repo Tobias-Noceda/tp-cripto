@@ -7,7 +7,7 @@ typedef size_t (*Writer)(FILE *output, const uint8_t *input, size_t size);
 /**
  * @brief Write data into the output file using LSB1 steganography.
  *
- * @note The function moves the file header position as it writes data.
+ * @note The function does not reset the file header position
  *
  * @param output The output file where data will be embedded (writes at current header position)
  * @param input The input data to be embedded
