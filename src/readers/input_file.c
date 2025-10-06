@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "../include/stego.h"
+#include <stego.h>
 
 Data get_message(const char *input)
 {

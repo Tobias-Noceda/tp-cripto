@@ -2,7 +2,7 @@ obj/
 
 *.o
 *.bin
-stego
+bin/
 
 *.txt
 *.bmp

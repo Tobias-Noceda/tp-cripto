@@ -1,4 +1,4 @@
-#include "../include/writers.h"
+#include <writers.h>
 
 size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
 {

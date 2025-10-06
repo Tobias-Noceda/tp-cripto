@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "stego.h"
+#include <stego.h>
 
 /**
  * @brief Get the output file

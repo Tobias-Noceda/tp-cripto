@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "include/readers.h"
-#include "include/writers.h"
+#include <readers.h>
+#include <writers.h>
 
 #define BMP_HEADER_SIZE 128
 
