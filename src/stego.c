@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        printf("Data extracted successfully to '%s'.\n", output_file_name);
+        printf("Data extracted successfully to '%s'.\n", full_output_file_name);
         if (extension != NULL)
         {
             printf("Extracted file extension: %s\n", extension);

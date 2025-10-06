@@ -28,7 +28,7 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
         return NULL;
     }
 
-    const uint8_t message_length = get_length(file);
+    const uint32_t message_length = get_length(file);
     if (message_length == 0)
     {
         fclose(file);
@@ -90,7 +90,19 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
         {
             if (length % EXTENSION_BLOCK_LENGTH == 0)
             {
-                *extension = realloc(*extension, length + EXTENSION_BLOCK_LENGTH);
+                void *tmp = realloc(*extension, length + EXTENSION_BLOCK_LENGTH);
+                if (tmp == NULL)
+                {
+                    perror("Memory allocation for extension failed");
+
+                    free(*extension);
+                    free(stego);
+                    fclose(file);
+
+                    return NULL;
+                }
+
+                *extension = tmp;
             }
 
             uint8_t byte = 0;

@@ -28,7 +28,7 @@ size_t get_output(FILE **file, const char *output, const char *input);
 Data get_message(const char *input);
 
 /**
- * @brief Retirieve a steganographed message using LSB1 method
+ * @brief Retrieve a steganographed message using LSB1 method
  *
  * @param fileName The name of the file to retrieve the message from
  * @return char* The retrieved message
