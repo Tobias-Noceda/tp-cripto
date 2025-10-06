@@ -10,9 +10,10 @@ RUN addgroup -g 1001 stego \
 WORKDIR /usr/app
 USER 1001
 
-COPY --chown=1001:1001 . .
-RUN chmod +x run.sh
+# Don't COPY code - it will be mounted as a volume at runtime
+# This allows live code updates from your host machine
 
-# RUN mkdir build && cd build && cmake .. && make
+VOLUME ["/usr/app"]
 
-CMD ["sh", "run.sh"]
+# Use a shell by default so you can run commands interactively
+CMD ["/bin/sh"]

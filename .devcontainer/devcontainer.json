@@ -5,7 +5,9 @@
 		"dockerfile": "../Dockerfile"
 	},
 	"features": {
-		"ghcr.io/cirolosapio/devcontainers-features/alpine-bash:0": {}
+		"ghcr.io/cirolosapio/devcontainers-features/alpine-bash:0": {},
+		"ghcr.io/devcontainers/features/common-utils:2.5.4": {},
+		"ghcr.io/cirolosapio/devcontainers-features/alpine-git:latest": {}
 	},
 	"customizations": {
 		"vscode": {
