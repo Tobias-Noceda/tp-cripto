@@ -9,7 +9,6 @@
 #define BMP_HEADER_SIZE 128
 
 int main(int argc, char *argv[]) {
-
     const char *input_file_name = NULL;
     const char *porter_file_name = NULL;
     const char *output_file_name = NULL;
