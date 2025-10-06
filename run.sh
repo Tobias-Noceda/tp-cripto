@@ -2,7 +2,7 @@
 img=$1
 msg=$2
 
-make DEBUG=1
+make clean all DEBUG=1
 
 extension=${msg##*.}
 
