@@ -52,29 +52,19 @@ Data get_message(const char *input)
 
     // Extract file extension including the dot
     const char *dot = strrchr(input, '.');
-    if (dot && dot != input)
+    if (!dot || dot == input)
     {
-        input_data.ext = strdup(dot);
-        if (input_data.ext == NULL)
-        {
-            perror("Memory allocation for extension failed");
-            free(input_data.data);
-            input_data.data = NULL;
-            input_data.size = 0;
-            return (Data){};
-        }
+        dot = ""; // No extension found
     }
-    else
+
+    input_data.ext = strdup(dot);
+    if (input_data.ext == NULL)
     {
-        input_data.ext = strdup("");
-        if (input_data.ext == NULL)
-        {
-            perror("Memory allocation for extension failed");
-            free(input_data.data);
-            input_data.data = NULL;
-            input_data.size = 0;
-            return (Data){};
-        }
+        perror("Memory allocation for extension failed");
+        free(input_data.data);
+        input_data.data = NULL;
+        input_data.size = 0;
+        return (Data){};
     }
 
     printf("Input file size: %u bytes\n", input_data.size);
