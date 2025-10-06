@@ -27,7 +27,7 @@
 				"ms-vsliveshare.vsliveshare",
 				"MS-CEINTL.vscode-language-pack-es",
 				"tonybaloney.vscode-pets",
-				"llvm-vs-code-extensions.lldb-dap"
+				"vadimcn.vscode-lldb"
 			]
 		}
 	}
