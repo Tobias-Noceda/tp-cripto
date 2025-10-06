@@ -114,6 +114,7 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
                 if (image_byte == EOF)
                 {
                     perror("Error reading file");
+                    free(*extension);
                     free(stego);
                     fclose(file);
                     return NULL;
