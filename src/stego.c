@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    printf("Data embedded successfully into 'output.bmp'.\n");
+    printf("Data embedded successfully into '%s'.\n", output_file_name);
 
     // free memory and close files
     free(input_data.data);

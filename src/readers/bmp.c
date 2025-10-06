@@ -15,7 +15,7 @@ size_t get_output(FILE **file, const char *output, const char *input)
         return 0;
     }
 
-    int ofd = open(output, O_RDWR | O_CREAT | O_TRUNC);
+    int ofd = open(output, O_RDWR | O_CREAT | O_TRUNC, 0644);
     if (ofd < 0)
     {
         perror("Error opening destination file");
