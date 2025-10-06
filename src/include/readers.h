@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "stego.h"
+#include <stego.h>
 
 /**
  * @brief Get the output file
@@ -26,3 +26,11 @@ size_t get_output(FILE **file, const char *output, const char *input);
  * @return Data The message data
  */
 Data get_message(const char *input);
+
+/**
+ * @brief Retrieve a steganographed message using LSB1 method
+ *
+ * @param fileName The name of the file to retrieve the message from
+ * @return char* The retrieved message
+ */
+Stego *retrieve_lsb1(const char *fileName, size_t offset, char **extension);
