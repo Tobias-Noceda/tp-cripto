@@ -1,4 +1,13 @@
 #!/bin/bash
-gcc -o stego src/writers/* src/readers/* src/stego.c -lssl -lcrypto
+img=$1
+msg=$2
 
-./stego -embed -in hello.txt -p mesi.bmp -out out.bmp
+make clean all DEBUG=1
+
+extension=${msg##*.}
+
+./bin/stego -embed -p $img -in $msg -out out.bmp
+./bin/stego -extract -p out.bmp -out extracted
+
+echo
+diff $msg extracted.$extension

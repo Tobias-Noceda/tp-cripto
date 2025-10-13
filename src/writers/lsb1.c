@@ -1,4 +1,4 @@
-#include "../include/writers.h"
+#include <writers.h>
 
 size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
 {
@@ -10,7 +10,7 @@ size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
         perror("Memory allocation failed");
         return 0;
     }
-    
+
     if (fread(data, 1, size, output) != size)
     {
         if (feof(output))
@@ -37,7 +37,7 @@ size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
         {
             uint8_t bit = (byte >> i) & 1;
             printf("Embedding bit: %d\n", bit);
-            
+
             data[curr_byte] = (data[curr_byte] & 0xFE) | bit;
             curr_byte++;
         }
