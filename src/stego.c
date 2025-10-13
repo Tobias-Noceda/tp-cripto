@@ -6,8 +6,8 @@
 
 #include <readers.h>
 #include <writers.h>
-
-#define BMP_HEADER_SIZE 128
+#include <logs.h>
+#include <bmp.h>
 
 int main(int argc, char *argv[])
 {
@@ -85,7 +85,8 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        fseek(porter, BMP_HEADER_SIZE, SEEK_SET); // Skip BMP header
+        uint32_t header_size = get_bmp_file_header(porter).offset;
+        fseek(porter, header_size, SEEK_SET); // Skip BMP header
 
         // turn the size into 4 bytes
         uint8_t size_bytes[4];
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
             fclose(porter);
             return EXIT_FAILURE;
         }
-        if (embed_data_lsb1(porter, input_data.data, input_data.size) == 0)
+        if (embed_data_lsb1(porter, (uint8_t *)input_data.data, input_data.size) == 0)
         {
             fprintf(stderr, "Failed to embed input data.\n");
             free(input_data.data);
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
             fclose(porter);
             return EXIT_FAILURE;
         }
-        if (embed_data_lsb1(porter, input_data.ext, strlen(input_data.ext) + 1) == 0)
+        if (embed_data_lsb1(porter, (uint8_t *)input_data.ext, strlen(input_data.ext) + 1) == 0)
         {
             fprintf(stderr, "Failed to embed file extension data.\n");
             free(input_data.data);
@@ -132,8 +133,18 @@ int main(int argc, char *argv[])
         printf("Porter file: %s\n", porter_file_name);
         printf("Output file: %s\n", output_file_name);
 
+        FILE *porter = fopen(porter_file_name, "rb");
+        if (porter == NULL)
+        {
+            perror("Error opening porter");
+            return EXIT_FAILURE;
+        }
+
+        const uint32_t header_size = get_bmp_file_header(porter).offset;
+        LOG("BMP Header size: %u\n", header_size);
+
         char *extension = NULL;
-        Stego *stego = retrieve_lsb1(porter_file_name, BMP_HEADER_SIZE, &extension);
+        Stego *stego = retrieve_lsb1(porter, header_size, &extension);
         if (stego == NULL)
         {
             fprintf(stderr, "Failed to retrieve stego data.\n");

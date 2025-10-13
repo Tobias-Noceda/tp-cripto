@@ -12,15 +12,8 @@
 
 static uint32_t get_length(FILE *file);
 
-Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
+Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
 {
-    FILE *file = fopen(file_name, "rb");
-    if (file == NULL)
-    {
-        perror("Error opening file");
-        return NULL;
-    }
-
     if (fseek(file, offset, SEEK_SET) < 0)
     {
         perror("File too small for offset");
