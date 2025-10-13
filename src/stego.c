@@ -9,18 +9,26 @@
 
 #define BMP_HEADER_SIZE 128
 
+StegoMethod stego_methods[] = {
+    {"LSB1", embed_data_lsb1, retrieve_lsb1},
+    {"LSB4", embed_data_lsb4, retrieve_lsb4}
+};
+
+static const StegoMethod *get_stego_method(const char *name);
+
 int main(int argc, char *argv[])
 {
     const char *input_file_name = NULL;
     const char *porter_file_name = NULL;
     const char *output_file_name = NULL;
+    const StegoMethod *stego_type = NULL;
     bool extract_mode = false;
 
-    if (argc < 7 || strcmp(argv[1], "-embed") != 0)
+    if (argc < 9 || strcmp(argv[1], "-embed") != 0)
     {
-        if (argc < 5 || strcmp(argv[1], "-extract") != 0)
+        if (argc < 7 || strcmp(argv[1], "-extract") != 0)
         {
-            fprintf(stderr, "Usage: %s -embed -in <input_file> -p <porter_file> -out <output_file>\n", argv[0]);
+            fprintf(stderr, "Usage: %s -embed -in <input_file> -p <porter_file> -out <output_file> -stego <stego_type>\n", argv[0]);
             return EXIT_FAILURE;
         }
         extract_mode = true;
@@ -40,11 +48,15 @@ int main(int argc, char *argv[])
         {
             output_file_name = argv[++i];
         }
+        else if (strcmp(argv[i], "-stego") == 0 && i + 1 < argc)
+        {
+            stego_type = get_stego_method(argv[++i]);
+        }
     }
 
-    if (porter_file_name == NULL || output_file_name == NULL || (!extract_mode && input_file_name == NULL))
+    if (porter_file_name == NULL || output_file_name == NULL || (!extract_mode && input_file_name == NULL) || stego_type == NULL)
     {
-        fprintf(stderr, "Input file, porter file, and output file must be specified.\n");
+        fprintf(stderr, "Input file, porter file, output file, and stego type must be specified.\n");
         return EXIT_FAILURE;
     }
 
@@ -54,6 +66,7 @@ int main(int argc, char *argv[])
         printf("Input file: %s\n", input_file_name);
         printf("Porter file: %s\n", porter_file_name);
         printf("Output file: %s\n", output_file_name);
+        printf("Stego type: %s\n", stego_type->name);
 
         FILE *porter;
         long porter_size = get_output(&porter, output_file_name, porter_file_name);
@@ -94,7 +107,7 @@ int main(int argc, char *argv[])
         size_bytes[2] = (input_data.size >> 8) & 0xFF;
         size_bytes[3] = input_data.size & 0xFF;
 
-        if (embed_data_lsb1(porter, size_bytes, 4) == 0)
+        if (stego_methods->embed(porter, size_bytes, 4) == 0)
         {
             fprintf(stderr, "Failed to embed size data.\n");
             free(input_data.data);
@@ -102,7 +115,7 @@ int main(int argc, char *argv[])
             fclose(porter);
             return EXIT_FAILURE;
         }
-        if (embed_data_lsb1(porter, input_data.data, input_data.size) == 0)
+        if (stego_methods->embed(porter, (uint8_t *)input_data.data, input_data.size) == 0)
         {
             fprintf(stderr, "Failed to embed input data.\n");
             free(input_data.data);
@@ -110,7 +123,7 @@ int main(int argc, char *argv[])
             fclose(porter);
             return EXIT_FAILURE;
         }
-        if (embed_data_lsb1(porter, input_data.ext, strlen(input_data.ext) + 1) == 0)
+        if (stego_methods->embed(porter, (uint8_t *)input_data.ext, strlen(input_data.ext) + 1) == 0)
         {
             fprintf(stderr, "Failed to embed file extension data.\n");
             free(input_data.data);
@@ -133,7 +146,7 @@ int main(int argc, char *argv[])
         printf("Output file: %s\n", output_file_name);
 
         char *extension = NULL;
-        Stego *stego = retrieve_lsb1(porter_file_name, BMP_HEADER_SIZE, &extension);
+        Stego *stego = stego_methods->retrieve(porter_file_name, BMP_HEADER_SIZE, &extension);
         if (stego == NULL)
         {
             fprintf(stderr, "Failed to retrieve stego data.\n");
@@ -198,4 +211,17 @@ int main(int argc, char *argv[])
     }
 
     return EXIT_SUCCESS;
+}
+
+static const StegoMethod *get_stego_method(const char *name)
+{
+    size_t methods_count = sizeof(stego_methods) / sizeof(StegoMethod);
+    for (size_t i = 0; i < methods_count; i++)
+    {
+        if (strcmp(stego_methods[i].name, name) == 0)
+        {
+            return &stego_methods[i];
+        }
+    }
+    return NULL;
 }

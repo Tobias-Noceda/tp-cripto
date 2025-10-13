@@ -34,3 +34,11 @@ Data get_message(const char *input);
  * @return char* The retrieved message
  */
 Stego *retrieve_lsb1(const char *fileName, size_t offset, char **extension);
+
+/**
+ * @brief Retrieve a steganographed message using LSB4 method
+ *
+ * @param fileName The name of the file to retrieve the message from
+ * @return char* The retrieved message
+ */
+Stego *retrieve_lsb4(const char *fileName, size_t offset, char **extension);

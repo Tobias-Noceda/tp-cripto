@@ -11,3 +11,11 @@ typedef struct {
     uint8_t data[];
 } Stego;
 
+typedef size_t (*Writer)(FILE *output, const uint8_t *input, size_t size);
+typedef Stego *(*Reader)(const char *file_name, size_t offset, char **extension);
+
+typedef struct {
+    char name[5];
+    Writer embed;
+    Reader retrieve;
+} StegoMethod;

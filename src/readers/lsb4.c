@@ -12,7 +12,7 @@
 
 static uint32_t get_length(FILE *file);
 
-Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
+Stego *retrieve_lsb4(const char *file_name, size_t offset, char **extension)
 {
     FILE *file = fopen(file_name, "rb");
     if (file == NULL)
@@ -21,7 +21,6 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
         return NULL;
     }
 
-    LOG("Offset: %zu\n", offset);
     if (fseek(file, offset, SEEK_SET) < 0)
     {
         perror("File too small for offset");
@@ -48,13 +47,14 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
     }
 
     // Read the message bits
-    for (size_t i = 0; i < message_length * 8; i++)
+    for (size_t i = 0; i < message_length * 2; i++)
     {
         char byte = fgetc(file);
 
         if (feof(file))
         {
             perror("Not enough bytes to read message");
+            LOG("Reached EOF at byte %zu\n", i);
 
             free(message);
             fclose(file);
@@ -62,8 +62,8 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
             return NULL;
         }
 
-        message[i / 8] <<= 1;
-        message[i / 8] |= (byte & 1);
+        message[i / 2] <<= 4;
+        message[i / 2] |= (byte & 0x0F);
     }
 
     LOG("Message: %.*s\n", message_length, message);
@@ -107,7 +107,7 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
             }
 
             uint8_t byte = 0;
-            for (size_t i = 0; i < 8; i++)
+            for (size_t i = 0; i < 2; i++)
             {
                 char image_byte = fgetc(file);
                 LOG("Image byte: %02x\n", image_byte);
@@ -121,8 +121,8 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
                     return NULL;
                 }
 
-                byte <<= 1;
-                byte |= image_byte & 1;
+                byte <<= 4;
+                byte |= (image_byte & 0x0F);
             }
 
             LOG("Extension byte: %c\n", byte);
@@ -141,7 +141,7 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
 
 static uint32_t get_length(FILE *file)
 {
-    const size_t count = sizeof(uint32_t) * 8;
+    const size_t count = sizeof(uint32_t) * 2;
     uint8_t img_bytes[count];
 
     if (fread(img_bytes, sizeof(uint8_t), count, file) != count)
@@ -154,8 +154,8 @@ static uint32_t get_length(FILE *file)
     for (size_t i = 0; i < count; i++)
     {
         uint8_t byte = img_bytes[i];
-        message_length <<= 1;
-        message_length |= byte & 1;
+        message_length <<= 4;
+        message_length |= byte & 0x0F;
     }
 
     return message_length;
