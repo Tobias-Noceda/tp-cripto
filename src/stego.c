@@ -145,6 +145,8 @@ int main(int argc, char *argv[])
 
         char *extension = NULL;
         Stego *stego = retrieve_lsb1(porter, header_size, &extension);
+        fclose(porter);
+
         if (stego == NULL)
         {
             fprintf(stderr, "Failed to retrieve stego data.\n");
