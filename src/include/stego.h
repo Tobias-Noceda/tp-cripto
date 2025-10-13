@@ -10,4 +10,3 @@ typedef struct {
     uint32_t size;
     uint8_t data[];
 } Stego;
-
