@@ -16,7 +16,7 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
 {
     if (fseek(file, offset, SEEK_SET) < 0)
     {
-        perror("File too small for offset");
+        perror("Failed to seek to offset in file");
         fclose(file);
         return NULL;
     }
