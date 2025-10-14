@@ -6,7 +6,7 @@ BITMAPFILEHEADER get_bmp_file_header(FILE *file)
 
     BITMAPFILEHEADER header;
     if (fread(&header, sizeof(BITMAPFILEHEADER), 1, file) < 1) {
-        perror("Error reading BMP file header");
+        perror("Failed to read BMP file header: file may be truncated or corrupted");
         return (BITMAPFILEHEADER){0};
     }
 
