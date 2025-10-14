@@ -87,7 +87,8 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
     if (extension != NULL)
     {
         int length = 0;
-        while (true)
+        uint8_t byte = 0;
+        do
         {
             if (length % EXTENSION_BLOCK_LENGTH == 0)
             {
@@ -106,7 +107,6 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
                 *extension = tmp;
             }
 
-            uint8_t byte = 0;
             for (size_t i = 0; i < 8; i++)
             {
                 char image_byte = fgetc(file);
@@ -127,12 +127,7 @@ Stego *retrieve_lsb1(const char *file_name, size_t offset, char **extension)
 
             LOG("Extension byte: %c\n", byte);
             (*extension)[length++] = byte;
-
-            if (!byte)
-            {
-                break;
-            }
-        }
+        } while (byte != 0);
     }
 
     fclose(file);
