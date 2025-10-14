@@ -36,7 +36,7 @@ typedef struct
  * @brief Get the BMP file header data
  * 
  * @param file The file pointer
- * @return BITMAPFILEHEADER The BMP file header
+ * @return BITMAPFILEHEADER The BMP file header, or a zeroed struct on error
  */
 BITMAPFILEHEADER get_bmp_file_header(FILE *file);
 
