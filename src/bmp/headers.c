@@ -1,4 +1,4 @@
-#include <bmp.h>
+#include "../include/bmp.h"
 
 BITMAPFILEHEADER get_bmp_file_header(FILE *file)
 {
