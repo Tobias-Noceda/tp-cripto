@@ -6,6 +6,7 @@ bin/
 
 *.txt
 *.bmp
+*.png
 !*.input.bmp
 
 .idea/
