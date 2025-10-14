@@ -85,7 +85,17 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        uint32_t header_size = get_bmp_file_header(porter).offset;
+        const BITMAPFILEHEADER header = get_bmp_file_header(porter);
+        if (header.signature != 0x4D42)
+        {
+            fprintf(stderr, "Porter file is not a valid BMP file.\n");
+            free(input_data.data);
+            free(input_data.ext);
+            fclose(porter);
+            return EXIT_FAILURE;
+        }
+
+        uint32_t header_size = header.offset;
         fseek(porter, header_size, SEEK_SET); // Skip BMP header
 
         // turn the size into 4 bytes
@@ -140,7 +150,15 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        const uint32_t header_size = get_bmp_file_header(porter).offset;
+        const BITMAPFILEHEADER header = get_bmp_file_header(porter);
+        if (header.signature != 0x4D42)
+        {
+            fprintf(stderr, "Porter file is not a valid BMP file.\n");
+            fclose(porter);
+            return EXIT_FAILURE;
+        }
+
+        const uint32_t header_size = header.offset;
         LOG("BMP Header size: %u\n", header_size);
 
         char *extension = NULL;
