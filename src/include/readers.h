@@ -30,15 +30,19 @@ Data get_message(const char *input);
 /**
  * @brief Retrieve a steganographed message using LSB1 method
  *
- * @param fileName The name of the file to retrieve the message from
+ * @param file The file pointer to read from
+ * @param offset The offset to start reading from
+ * @param extension Pointer to store the file extension
  * @return char* The retrieved message
  */
-Stego *retrieve_lsb1(const char *fileName, size_t offset, char **extension);
+Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension);
 
 /**
  * @brief Retrieve a steganographed message using LSB4 method
  *
- * @param fileName The name of the file to retrieve the message from
+ * @param file The file pointer to read from
+ * @param offset The offset to start reading from
+ * @param extension Pointer to store the file extension
  * @return char* The retrieved message
  */
-Stego *retrieve_lsb4(const char *fileName, size_t offset, char **extension);
+Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension);

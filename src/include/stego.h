@@ -12,7 +12,7 @@ typedef struct {
 } Stego;
 
 typedef size_t (*Writer)(FILE *output, const uint8_t *input, size_t size);
-typedef Stego *(*Reader)(const char *file_name, size_t offset, char **extension);
+typedef Stego *(*Reader)(FILE *file, size_t offset, char **extension);
 
 typedef struct {
     char name[5];

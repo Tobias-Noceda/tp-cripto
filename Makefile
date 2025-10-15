@@ -8,7 +8,7 @@ endif
 
 ROOT = ./src
 
-SRCS = $(wildcard $(ROOT)/readers/*.c) $(wildcard $(ROOT)/writers/*.c) $(ROOT)/stego.c
+SRCS = $(wildcard $(ROOT)/readers/*.c) $(wildcard $(ROOT)/writers/*.c) $(wildcard $(ROOT)/bmp/*.c) $(ROOT)/stego.c
 HDRS = $(ROOT)/include
 
 OBJS = $(SRCS:.c=.o)

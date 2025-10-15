@@ -6,8 +6,8 @@
 
 #include <readers.h>
 #include <writers.h>
-
-#define BMP_HEADER_SIZE 128
+#include <logs.h>
+#include <bmp.h>
 
 StegoMethod stego_methods[] = {
     {"LSB1", embed_data_lsb1, retrieve_lsb1},
@@ -98,7 +98,18 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        fseek(porter, BMP_HEADER_SIZE, SEEK_SET); // Skip BMP header
+        const BITMAPFILEHEADER header = get_bmp_file_header(porter);
+        if (header.signature != 0x4D42)
+        {
+            fprintf(stderr, "Porter file is not a valid BMP file.\n");
+            free(input_data.data);
+            free(input_data.ext);
+            fclose(porter);
+            return EXIT_FAILURE;
+        }
+
+        uint32_t header_size = header.offset;
+        fseek(porter, header_size, SEEK_SET); // Skip BMP header
 
         // turn the size into 4 bytes
         uint8_t size_bytes[4];
@@ -145,8 +156,28 @@ int main(int argc, char *argv[])
         printf("Porter file: %s\n", porter_file_name);
         printf("Output file: %s\n", output_file_name);
 
+        FILE *porter = fopen(porter_file_name, "rb");
+        if (porter == NULL)
+        {
+            perror("Error opening porter");
+            return EXIT_FAILURE;
+        }
+
+        const BITMAPFILEHEADER header = get_bmp_file_header(porter);
+        if (header.signature != 0x4D42)
+        {
+            fprintf(stderr, "Porter file is not a valid BMP file.\n");
+            fclose(porter);
+            return EXIT_FAILURE;
+        }
+
+        const uint32_t header_size = header.offset;
+        LOG("BMP Header size: %u\n", header_size);
+
         char *extension = NULL;
-        Stego *stego = stego_methods->retrieve(porter_file_name, BMP_HEADER_SIZE, &extension);
+        Stego *stego = stego_methods->retrieve(porter, header_size, &extension);
+        fclose(porter);
+
         if (stego == NULL)
         {
             fprintf(stderr, "Failed to retrieve stego data.\n");
