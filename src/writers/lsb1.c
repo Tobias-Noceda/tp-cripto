@@ -32,11 +32,11 @@ size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
     {
         uint8_t byte = input[curr_byte / 8];
 
-        printf("Embedding byte: %02X\n", byte);
+        LOG("Embedding byte: %02X\n", byte);
         for (int i = 7; i >= 0; i--)
         {
             uint8_t bit = (byte >> i) & 1;
-            printf("Embedding bit: %d\n", bit);
+            LOG("Embedding bit: %d\n", bit);
 
             data[curr_byte] = (data[curr_byte] & 0xFE) | bit;
             curr_byte++;

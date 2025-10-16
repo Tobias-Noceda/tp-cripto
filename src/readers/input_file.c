@@ -67,9 +67,9 @@ Data get_message(const char *input)
         return (Data){};
     }
 
-    printf("Input file size: %u bytes\n", input_data.size);
-    printf("Input file extension: %s\n", input_data.ext);
-    printf("Input file data: %.*s\n", input_data.size, input_data.data);
+    LOG("Input file size: %u bytes\n", input_data.size);
+    LOG("Input file extension: %s\n", input_data.ext);
+    LOG("Input file data: %.*s\n", input_data.size, input_data.data);
 
     return input_data;
 }

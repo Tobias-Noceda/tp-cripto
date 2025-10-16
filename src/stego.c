@@ -62,11 +62,11 @@ int main(int argc, char *argv[])
 
     if (!extract_mode)
     {
-        printf("Embedding mode:\n");
-        printf("Input file: %s\n", input_file_name);
-        printf("Porter file: %s\n", porter_file_name);
-        printf("Output file: %s\n", output_file_name);
-        printf("Stego type: %s\n", stego_type->name);
+        LOG("Embedding mode:\n");
+        LOG("Input file: %s\n", input_file_name);
+        LOG("Porter file: %s\n", porter_file_name);
+        LOG("Output file: %s\n", output_file_name);
+        LOG("Stego type: %s\n", stego_type->name);
 
         FILE *porter;
         long porter_size = get_output(&porter, output_file_name, porter_file_name);
@@ -152,9 +152,9 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("Extracting mode:\n");
-        printf("Porter file: %s\n", porter_file_name);
-        printf("Output file: %s\n", output_file_name);
+        LOG("Extracting mode:\n");
+        LOG("Porter file: %s\n", porter_file_name);
+        LOG("Output file: %s\n", output_file_name);
 
         FILE *porter = fopen(porter_file_name, "rb");
         if (porter == NULL)
