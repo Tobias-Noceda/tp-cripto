@@ -85,7 +85,7 @@ static struct argp argp = {
     .doc = "A steganography tool for embedding and extracting data from BMP images using LSB methods.",
 };
 
-static StegoMethod stego_methods[] = {
+static const StegoMethod stego_methods[] = {
     {"LSB1", embed_data_lsb1, retrieve_lsb1},
     {"LSB4", embed_data_lsb4, retrieve_lsb4},
     {0},
