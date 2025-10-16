@@ -176,7 +176,7 @@ typedef struct Node
     struct Node *next;
 } Node;
 
-static bool push_ptr_list(Node **head, void *ptr);
+static bool push_ptr_list(Node **head, Node **tail, void *ptr);
 static void free_ptr_list(Node *node);
 
 static char *prepend_dash(char *arg);
@@ -187,13 +187,14 @@ Arguments get_args(int argc, char *argv[])
 
     // Convert single-dash options to double-dash options for argp compatibility
     Node *head = NULL;
+    Node *tail = NULL;
 
     for (int i = 1; i < argc; i++)
     {
         if (argv[i][0] == '-' && strlen(argv[i]) > 2 && argv[i][1] != '-')
         {
             argv[i] = prepend_dash(argv[i]);
-            if (!argv[i] || !push_ptr_list(&head, argv[i])) {
+            if (!argv[i] || !push_ptr_list(&head, &tail, argv[i])) {
                 free(argv[i]); // free(NULL) is safe
                 free_ptr_list(head);
                 exit(EXIT_FAILURE);
@@ -220,10 +221,8 @@ static void free_ptr_list(Node *node)
     free(node);
 }
 
-static bool push_ptr_list(Node **head, void *ptr)
+static bool push_ptr_list(Node **head, Node **tail, void *ptr)
 {
-    static Node *tail = NULL;
-
     Node *new_node = malloc(sizeof(Node));
     if (!new_node)
     {
@@ -237,8 +236,8 @@ static bool push_ptr_list(Node **head, void *ptr)
     if (!*head)
         *head = new_node;
     else
-        (tail)->next = new_node;
-    tail = new_node;
+        (*tail)->next = new_node;
+    *tail = new_node;
 
     return true;
 }
