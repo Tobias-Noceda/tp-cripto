@@ -1,9 +1,9 @@
 #include <writers.h>
 #include <logs.h>
 
-size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
+size_t embed_data_lsb4(FILE *output, const uint8_t *input, size_t size)
 {
-    size *= 8;
+    size *= 2;
 
     uint8_t *data = malloc(size);
     if (data == NULL)
@@ -31,15 +31,15 @@ size_t embed_data_lsb1(FILE *output, const uint8_t *input, size_t size)
     size_t curr_byte = 0;
     while (curr_byte < size)
     {
-        uint8_t byte = input[curr_byte / 8];
+        uint8_t byte = input[curr_byte / 2];
 
         LOG("Embedding byte: %02X\n", byte);
-        for (int i = 7; i >= 0; i--)
+        for (int i = 1; i >= 0; i--)
         {
-            uint8_t bit = (byte >> i) & 1;
+            uint8_t bit = (byte >> (i * 4)) & 0x0F;
             LOG("Embedding bit: %d\n", bit);
 
-            data[curr_byte] = (data[curr_byte] & 0xFE) | bit;
+            data[curr_byte] = (data[curr_byte] & 0xF0) | bit;
             curr_byte++;
         }
     }

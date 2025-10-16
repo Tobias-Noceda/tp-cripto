@@ -12,11 +12,11 @@
 
 static uint32_t get_length(FILE *file);
 
-Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
+Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
 {
     if (fseek(file, offset, SEEK_SET) < 0)
     {
-        perror("Failed to seek to offset in file");
+        perror("File too small for offset");
         return NULL;
     }
 
@@ -36,7 +36,7 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
     }
 
     // Read the message bits
-    for (size_t i = 0; i < message_length * 8; i++)
+    for (size_t i = 0; i < message_length * 2; i++)
     {
         char byte = fgetc(file);
 
@@ -50,8 +50,8 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
             return NULL;
         }
 
-        (stego->data)[i / 8] <<= 1;
-        (stego->data)[i / 8] |= (byte & 1);
+        (stego->data)[i / 2] <<= 4;
+        (stego->data)[i / 2] |= (byte & 0x0F);
     }
 
     stego->size = message_length;
@@ -78,7 +78,7 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
                 *extension = tmp;
             }
 
-            for (size_t i = 0; i < 8; i++)
+            for (size_t i = 0; i < 2; i++)
             {
                 char image_byte = fgetc(file);
                 LOG("Image byte: %02x\n", image_byte);
@@ -86,15 +86,13 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
                 if (feof(file))
                 {
                     perror("Error reading file");
-
                     free(*extension);
                     free(stego);
-
                     return NULL;
                 }
 
-                byte <<= 1;
-                byte |= image_byte & 1;
+                byte <<= 4;
+                byte |= (image_byte & 0x0F);
             }
 
             LOG("Extension byte: %c\n", byte);
@@ -107,7 +105,7 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
 
 static uint32_t get_length(FILE *file)
 {
-    const size_t count = sizeof(uint32_t) * 8;
+    const size_t count = sizeof(uint32_t) * 2;
     uint8_t img_bytes[count];
 
     if (fread(img_bytes, sizeof(uint8_t), count, file) != count)
@@ -120,8 +118,8 @@ static uint32_t get_length(FILE *file)
     for (size_t i = 0; i < count; i++)
     {
         uint8_t byte = img_bytes[i];
-        message_length <<= 1;
-        message_length |= byte & 1;
+        message_length <<= 4;
+        message_length |= byte & 0x0F;
     }
 
     return message_length;

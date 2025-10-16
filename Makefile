@@ -1,3 +1,5 @@
+include Makefile.inc
+
 ifneq ($(DEBUG), 0)
 CFLAGS += -g -DDEVELOPMENT
 else
