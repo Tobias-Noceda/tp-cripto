@@ -223,21 +223,21 @@ static void free_ptr_list(Node *node)
 
 static bool push_ptr_list(Node **head, Node **tail, void *ptr)
 {
-    Node *new_node = malloc(sizeof(Node));
-    if (!new_node)
+    Node *node = malloc(sizeof(Node));
+    if (!node)
     {
         perror("Memory allocation failed");
         return false;
     }
 
-    new_node->ptr = ptr;
-    new_node->next = NULL;
+    node->ptr = ptr;
+    node->next = NULL;
 
     if (!*head)
-        *head = new_node;
+        *head = node;
     else
-        (*tail)->next = new_node;
-    *tail = new_node;
+        (*tail)->next = node;
+    *tail = node;
 
     return true;
 }
