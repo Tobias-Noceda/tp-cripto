@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk --no-cache add build-base openssl-dev openssl make cmake gdb valgrind
+RUN apk --no-cache add build-base openssl-dev openssl argp-standalone make cmake gdb valgrind
 
 RUN addgroup -g 1001 stego \
     && adduser -D -u 1001 -G stego stego \

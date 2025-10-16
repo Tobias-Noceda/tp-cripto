@@ -8,7 +8,7 @@ endif
 
 ROOT = ./src
 
-SRCS = $(wildcard $(ROOT)/readers/*.c) $(wildcard $(ROOT)/writers/*.c) $(wildcard $(ROOT)/bmp/*.c) $(ROOT)/stego.c
+SRCS = $(wildcard $(ROOT)/readers/*.c) $(wildcard $(ROOT)/writers/*.c) $(wildcard $(ROOT)/bmp/*.c) $(wildcard $(ROOT)/*.c)
 HDRS = $(ROOT)/include
 
 OBJS = $(SRCS:.c=.o)
@@ -19,7 +19,7 @@ all: $(EXEC)
 
 $(EXEC):
 	@mkdir -p bin
-	$(CC) $(CFLAGS) -I$(HDRS) -o $@ $(SRCS)
+	$(CC) $(SRCS) $(CFLAGS) -I$(HDRS) -o $@
 
 check: all
 	@echo "Running tests..."
