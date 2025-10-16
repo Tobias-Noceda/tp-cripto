@@ -88,7 +88,7 @@ static struct argp argp = {
 static StegoMethod stego_methods[] = {
     {"LSB1", embed_data_lsb1, retrieve_lsb1},
     {"LSB4", embed_data_lsb4, retrieve_lsb4},
-    {NULL, NULL, NULL},
+    {0},
 };
 
 static StegoMethod get_stego_method(const char *name)
