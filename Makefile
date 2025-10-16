@@ -21,6 +21,12 @@ $(EXEC):
 	@mkdir -p bin
 	$(CC) $(CFLAGS) -I$(HDRS) -o $@ $(SRCS)
 
+check: all
+	@echo "Running tests..."
+	@./test.sh LSB1
+	@./test.sh LSB4
+	@echo "All tests done!"
+
 clean:
 	rm -f $(OBJS) $(EXEC)
 
