@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
         size_bytes[2] = (input_data.size >> 8) & 0xFF;
         size_bytes[3] = input_data.size & 0xFF;
 
-        if (stego_methods->embed(porter, size_bytes, 4) == 0)
+        if (stego_type->embed(porter, size_bytes, 4) == 0)
         {
             fprintf(stderr, "Failed to embed size data.\n");
             free(input_data.data);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
             fclose(porter);
             return EXIT_FAILURE;
         }
-        if (stego_methods->embed(porter, (uint8_t *)input_data.data, input_data.size) == 0)
+        if (stego_type->embed(porter, (uint8_t *)input_data.data, input_data.size) == 0)
         {
             fprintf(stderr, "Failed to embed input data.\n");
             free(input_data.data);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
             fclose(porter);
             return EXIT_FAILURE;
         }
-        if (stego_methods->embed(porter, (uint8_t *)input_data.ext, strlen(input_data.ext) + 1) == 0)
+        if (stego_type->embed(porter, (uint8_t *)input_data.ext, strlen(input_data.ext) + 1) == 0)
         {
             fprintf(stderr, "Failed to embed file extension data.\n");
             free(input_data.data);
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         LOG("BMP Header size: %u\n", header_size);
 
         char *extension = NULL;
-        Stego *stego = stego_methods->retrieve(porter, header_size, &extension);
+        Stego *stego = stego_type->retrieve(porter, header_size, &extension);
         fclose(porter);
 
         if (stego == NULL)
