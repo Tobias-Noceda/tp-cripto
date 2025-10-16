@@ -44,19 +44,19 @@ static struct argp_option options[] = {
         .name = "embed",
         .key = ARGK_EMBED,
         .arg = NULL,
-        .doc = "Enable steganography mode",
+        .doc = "Enable embedding mode (hide data in an image)",
     },
     {
         .name = "extract",
         .key = ARGK_EXTRACT,
         .arg = NULL,
-        .doc = "Enable steganography mode",
+        .doc = "Enable extraction mode (recover hidden data from an image)",
     },
     {
         .name = "stego",
         .key = ARGK_STEGO,
         .arg = "STEGO_TYPE",
-        .doc = "Enable steganography mode",
+        .doc = "Select steganography method to use",
     },
     {
         .name = "p",
