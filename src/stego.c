@@ -254,5 +254,6 @@ static const StegoMethod *get_stego_method(const char *name)
             return &stego_methods[i];
         }
     }
+
     return NULL;
 }
