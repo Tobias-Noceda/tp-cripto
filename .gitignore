@@ -8,6 +8,7 @@ bin/
 *.bmp
 *.png
 !*.input.bmp
+!*.output.png
 
 .idea/
 .vscode/
