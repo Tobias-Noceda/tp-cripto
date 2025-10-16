@@ -19,7 +19,7 @@ all: $(EXEC)
 
 $(EXEC):
 	@mkdir -p bin
-	$(CC) $(CFLAGS) -I$(HDRS) -o $@ $(SRCS)
+	$(CC) $(SRCS) $(CFLAGS) -I$(HDRS) -o $@
 
 clean:
 	rm -f $(OBJS) $(EXEC)
