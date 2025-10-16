@@ -94,8 +94,9 @@ static StegoMethod stego_methods[] = {
 static StegoMethod get_stego_method(const char *name)
 {
     size_t i;
-    for (i = 0; stego_methods[i].name && strcasecmp(stego_methods[i].name, name); i++)
-        ;
+    for (i = 0; stego_methods[i].name; i++)
+        if (!strcasecmp(stego_methods[i].name, name))
+            return stego_methods[i];
     return stego_methods[i];
 }
 
