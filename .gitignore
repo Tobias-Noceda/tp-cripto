@@ -6,7 +6,9 @@ bin/
 
 *.txt
 *.bmp
+*.png
 !*.input.bmp
+!*.output.png
 
 .idea/
 .vscode/

@@ -3,7 +3,7 @@
 
 size_t embed_data_lsb4(FILE *output, const uint8_t *input, size_t size)
 {
-    size *= 4;
+    size *= 2;
 
     uint8_t *data = malloc(size);
     if (data == NULL)
@@ -46,6 +46,12 @@ size_t embed_data_lsb4(FILE *output, const uint8_t *input, size_t size)
 
     size_t written = fwrite(data, sizeof(uint8_t), size, output);
     free(data);
+
+    if (written != size)
+    {
+        perror("Error writing to output file");
+        return 0;
+    }
 
     return written;
 }
