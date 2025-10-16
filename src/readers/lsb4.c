@@ -17,14 +17,12 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
     if (fseek(file, offset, SEEK_SET) < 0)
     {
         perror("File too small for offset");
-        fclose(file);
         return NULL;
     }
 
     const uint32_t message_length = get_length(file);
     if (message_length == 0)
     {
-        fclose(file);
         return NULL;
     }
 
@@ -35,7 +33,6 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
     if (message == NULL)
     {
         perror("Memory allocation for message failed");
-        fclose(file);
         return NULL;
     }
 
@@ -50,7 +47,6 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
             LOG("Reached EOF at byte %zu\n", i);
 
             free(message);
-            fclose(file);
 
             return NULL;
         }
@@ -67,7 +63,6 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
         perror("Memory allocation for Stego failed");
 
         free(message);
-        fclose(file);
 
         return NULL;
     }
@@ -91,7 +86,6 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
 
                     free(*extension);
                     free(stego);
-                    fclose(file);
 
                     return NULL;
                 }
@@ -110,7 +104,6 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
                     perror("Error reading file");
                     free(*extension);
                     free(stego);
-                    fclose(file);
                     return NULL;
                 }
 
@@ -128,7 +121,6 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
         }
     }
 
-    fclose(file);
     return stego;
 }
 
