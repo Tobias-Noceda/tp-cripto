@@ -249,7 +249,7 @@ static const StegoMethod *get_stego_method(const char *name)
     size_t methods_count = sizeof(stego_methods) / sizeof(StegoMethod);
     for (size_t i = 0; i < methods_count; i++)
     {
-        if (strcmp(stego_methods[i].name, name) == 0)
+        if (strcasecmp(stego_methods[i].name, name) == 0)
         {
             return &stego_methods[i];
         }
