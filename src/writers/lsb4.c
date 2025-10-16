@@ -1,4 +1,5 @@
 #include <writers.h>
+#include <logs.h>
 
 size_t embed_data_lsb4(FILE *output, const uint8_t *input, size_t size)
 {

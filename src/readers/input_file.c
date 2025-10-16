@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <stego.h>
+#include <logs.h>
 
 Data get_message(const char *input)
 {
