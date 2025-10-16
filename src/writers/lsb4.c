@@ -3,7 +3,7 @@
 
 size_t embed_data_lsb4(FILE *output, const uint8_t *input, size_t size)
 {
-    size *= 4;
+    size *= 2;
 
     uint8_t *data = malloc(size);
     if (data == NULL)
