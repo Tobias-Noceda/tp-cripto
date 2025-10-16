@@ -19,7 +19,7 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
         perror("Failed to seek to offset in file");
         return NULL;
     }
-
+    
     const uint32_t message_length = get_length(file);
     if (message_length == 0)
     {
@@ -28,11 +28,10 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
 
     LOG("Message length: %u\n", message_length);
 
-    // Allocate memory for the message
-    uint8_t *message = malloc(message_length);
-    if (message == NULL)
+    Stego *stego = malloc(sizeof(Stego) + message_length);
+    if (stego == NULL)
     {
-        perror("Memory allocation for message failed");
+        perror("Memory allocation for Stego failed");
         return NULL;
     }
 
@@ -44,28 +43,14 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
         if (feof(file))
         {
             perror("Not enough bytes to read message");
-            free(message);
             return NULL;
         }
 
-        message[i / 8] <<= 1;
-        message[i / 8] |= (byte & 1);
-    }
-
-    LOG("Message: %.*s\n", message_length, message);
-
-    Stego *stego = malloc(sizeof(Stego) + message_length);
-    if (stego == NULL)
-    {
-        perror("Memory allocation for Stego failed");
-        free(message);
-        return NULL;
+        (stego->data)[i / 8] <<= 1;
+        (stego->data)[i / 8] |= (byte & 1);
     }
 
     stego->size = message_length;
-    memcpy(stego->data, message, message_length);
-
-    free(message);
 
     if (extension != NULL)
     {
