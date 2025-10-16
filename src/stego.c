@@ -1,3 +1,5 @@
+#include "args.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -9,74 +11,27 @@
 #include <logs.h>
 #include <bmp.h>
 
-StegoMethod stego_methods[] = {
-    {"LSB1", embed_data_lsb1, retrieve_lsb1},
-    {"LSB4", embed_data_lsb4, retrieve_lsb4}
-};
-
-static const StegoMethod *get_stego_method(const char *name);
-
 int main(int argc, char *argv[])
 {
-    const char *input_file_name = NULL;
-    const char *porter_file_name = NULL;
-    const char *output_file_name = NULL;
-    const StegoMethod *stego_type = NULL;
-    bool extract_mode = false;
+    Arguments args = get_args(argc, argv);
 
-    if (argc < 9 || strcmp(argv[1], "-embed") != 0)
-    {
-        if (argc < 7 || strcmp(argv[1], "-extract") != 0)
-        {
-            fprintf(stderr, "Usage: %s -embed -in <input_file> -p <porter_file> -out <output_file> -stego <stego_type>\n", argv[0]);
-            return EXIT_FAILURE;
-        }
-        extract_mode = true;
-    }
-
-    for (int i = 1; i < argc; i++)
-    {
-        if (strcmp(argv[i], "-in") == 0 && i + 1 < argc)
-        {
-            input_file_name = argv[++i];
-        }
-        else if (strcmp(argv[i], "-p") == 0 && i + 1 < argc)
-        {
-            porter_file_name = argv[++i];
-        }
-        else if (strcmp(argv[i], "-out") == 0 && i + 1 < argc)
-        {
-            output_file_name = argv[++i];
-        }
-        else if (strcmp(argv[i], "-stego") == 0 && i + 1 < argc)
-        {
-            stego_type = get_stego_method(argv[++i]);
-        }
-    }
-
-    if (porter_file_name == NULL || output_file_name == NULL || (!extract_mode && input_file_name == NULL) || stego_type == NULL)
-    {
-        fprintf(stderr, "Input file, porter file, output file, and stego type must be specified.\n");
-        return EXIT_FAILURE;
-    }
-
-    if (!extract_mode)
+    if (args.embed)
     {
         LOG("Embedding mode:\n");
-        LOG("Input file: %s\n", input_file_name);
-        LOG("Porter file: %s\n", porter_file_name);
-        LOG("Output file: %s\n", output_file_name);
-        LOG("Stego type: %s\n", stego_type->name);
+        LOG("Input file: %s\n", args.input_path);
+        LOG("Porter file: %s\n", args.porter_path);
+        LOG("Output file: %s\n", args.output_path);
+        LOG("Stego type: %s\n", args.stego.name);
 
         FILE *porter;
-        long porter_size = get_output(&porter, output_file_name, porter_file_name);
+        long porter_size = get_output(&porter, args.output_path, args.porter_path);
         if (porter_size == 0)
         {
             perror("Failed to open porter file");
             return EXIT_FAILURE;
         }
 
-        Data input_data = get_message(input_file_name);
+        Data input_data = get_message(args.input_path);
         if (input_data.data == NULL)
         {
             fclose(porter);
@@ -118,7 +73,7 @@ int main(int argc, char *argv[])
         size_bytes[2] = (input_data.size >> 8) & 0xFF;
         size_bytes[3] = input_data.size & 0xFF;
 
-        if (stego_type->embed(porter, size_bytes, 4) == 0)
+        if (args.stego.embed(porter, size_bytes, 4) == 0)
         {
             fprintf(stderr, "Failed to embed size data.\n");
             free(input_data.data);
@@ -126,7 +81,7 @@ int main(int argc, char *argv[])
             fclose(porter);
             return EXIT_FAILURE;
         }
-        if (stego_type->embed(porter, (uint8_t *)input_data.data, input_data.size) == 0)
+        if (args.stego.embed(porter, (uint8_t *)input_data.data, input_data.size) == 0)
         {
             fprintf(stderr, "Failed to embed input data.\n");
             free(input_data.data);
@@ -134,7 +89,7 @@ int main(int argc, char *argv[])
             fclose(porter);
             return EXIT_FAILURE;
         }
-        if (stego_type->embed(porter, (uint8_t *)input_data.ext, strlen(input_data.ext) + 1) == 0)
+        if (args.stego.embed(porter, (uint8_t *)input_data.ext, strlen(input_data.ext) + 1) == 0)
         {
             fprintf(stderr, "Failed to embed file extension data.\n");
             free(input_data.data);
@@ -143,7 +98,7 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        printf("Data embedded successfully into '%s'.\n", output_file_name);
+        printf("Data embedded successfully into '%s'.\n", args.output_path);
 
         // free memory and close files
         free(input_data.data);
@@ -153,10 +108,10 @@ int main(int argc, char *argv[])
     else
     {
         LOG("Extracting mode:\n");
-        LOG("Porter file: %s\n", porter_file_name);
-        LOG("Output file: %s\n", output_file_name);
+        LOG("Porter file: %s\n", args.porter_path);
+        LOG("Output file: %s\n", args.output_path);
 
-        FILE *porter = fopen(porter_file_name, "rb");
+        FILE *porter = fopen(args.porter_path, "rb");
         if (porter == NULL)
         {
             perror("Error opening porter");
@@ -175,7 +130,7 @@ int main(int argc, char *argv[])
         LOG("BMP Header size: %u\n", header_size);
 
         char *extension = NULL;
-        Stego *stego = stego_type->retrieve(porter, header_size, &extension);
+        Stego *stego = args.stego.retrieve(porter, header_size, &extension);
         fclose(porter);
 
         if (stego == NULL)
@@ -188,7 +143,7 @@ int main(int argc, char *argv[])
         char *full_output_file_name;
         if (extension != NULL)
         {
-            full_output_file_name = malloc(strlen(output_file_name) + strlen(extension) + 2);
+            full_output_file_name = malloc(strlen(args.output_path) + strlen(extension) + 2);
             if (full_output_file_name == NULL)
             {
                 perror("Memory allocation failed");
@@ -196,11 +151,11 @@ int main(int argc, char *argv[])
                 free(extension);
                 return EXIT_FAILURE;
             }
-            sprintf(full_output_file_name, "%s%s", output_file_name, extension);
+            sprintf(full_output_file_name, "%s%s", args.output_path, extension);
         }
         else
         {
-            full_output_file_name = strdup(output_file_name);
+            full_output_file_name = strdup(args.output_path);
             if (full_output_file_name == NULL)
             {
                 perror("Memory allocation failed");
@@ -242,18 +197,4 @@ int main(int argc, char *argv[])
     }
 
     return EXIT_SUCCESS;
-}
-
-static const StegoMethod *get_stego_method(const char *name)
-{
-    size_t methods_count = sizeof(stego_methods) / sizeof(StegoMethod);
-    for (size_t i = 0; i < methods_count; i++)
-    {
-        if (strcasecmp(stego_methods[i].name, name) == 0)
-        {
-            return &stego_methods[i];
-        }
-    }
-
-    return NULL;
 }
