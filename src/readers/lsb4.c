@@ -27,14 +27,14 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
     }
 
     LOG("Message length: %u\n", message_length);
-    
+
     Stego *stego = malloc(sizeof(Stego) + message_length);
     if (stego == NULL)
     {
         perror("Memory allocation for Stego failed");
         return NULL;
     }
-    
+
     // Read the message bits
     for (size_t i = 0; i < message_length * 2; i++)
     {
@@ -44,6 +44,8 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
         {
             perror("Not enough bytes to read message");
             LOG("Reached EOF at byte %zu\n", i);
+
+            free(stego);
 
             return NULL;
         }
@@ -56,7 +58,7 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension)
 
     if (extension != NULL)
     {
-                int length = 0;
+        int length = 0;
         uint8_t byte = 0;
         do
         {

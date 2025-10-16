@@ -19,7 +19,7 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
         perror("Failed to seek to offset in file");
         return NULL;
     }
-    
+
     const uint32_t message_length = get_length(file);
     if (message_length == 0)
     {
@@ -43,6 +43,10 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
         if (feof(file))
         {
             perror("Not enough bytes to read message");
+            LOG("Reached EOF at byte %zu\n", i);
+
+            free(stego);
+
             return NULL;
         }
 
