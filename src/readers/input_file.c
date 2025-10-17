@@ -6,12 +6,13 @@
 #include <stego.h>
 #include <logs.h>
 
-Data get_message(const char *input)
+Data get_message(const char *input, uint8_t **memory, uint32_t *length)
 {
     Data input_data = {
-        .size = 0,
+        .size = NULL,
         .data = NULL,
-        .ext = NULL};
+        .ext = NULL
+    };
 
     FILE *file = fopen(input, "rb");
     if (file == NULL)
@@ -31,26 +32,6 @@ Data get_message(const char *input)
         return (Data){};
     }
 
-    input_data.data = malloc(file_size);
-    if (input_data.data == NULL)
-    {
-        perror("Memory allocation failed");
-        fclose(file);
-        return (Data){};
-    }
-
-    size_t read_size = fread(input_data.data, 1, file_size, file);
-    if (read_size != file_size)
-    {
-        perror("Error reading file");
-        free(input_data.data);
-        fclose(file);
-        return (Data){};
-    }
-
-    fclose(file);
-    input_data.size = (uint32_t)file_size;
-
     // Extract file extension including the dot
     const char *dot = strrchr(input, '.');
     if (!dot || dot == input)
@@ -58,19 +39,40 @@ Data get_message(const char *input)
         dot = ""; // No extension found
     }
 
-    input_data.ext = strdup(dot);
-    if (input_data.ext == NULL)
+    *length = sizeof(uint32_t) + file_size + strlen(dot) + 1;
+    *memory = malloc(*length); // 4 bytes for size, file data, extension, null terminator
+    if (*memory == NULL)
     {
-        perror("Memory allocation for extension failed");
-        free(input_data.data);
-        input_data.data = NULL;
-        input_data.size = 0;
+        perror("Memory allocation failed");
+
+        *length = 0;
+        fclose(file);
+
         return (Data){};
     }
 
-    LOG("Input file size: %u bytes\n", input_data.size);
+    input_data.size = (uint32_t *)(*memory);
+    input_data.data = (char *)(*memory + sizeof(uint32_t));
+    input_data.ext = (char *)(*memory + sizeof(uint32_t) + file_size);
+
+    
+    size_t read_size = fread(input_data.data, 1, file_size, file);
+    if (read_size != file_size)
+    {
+        perror("Error reading file");
+        free(*memory);
+        fclose(file);
+        return (Data){};
+    }
+    
+    fclose(file);
+    *input_data.size = (uint32_t)file_size;
+    
+    memcpy(input_data.ext, dot, strlen(dot) + 1); // Copy extension with null terminator
+
+    LOG("Input file size: %u bytes\n", *input_data.size);
+    LOG("Input file data: %.*s\n", *input_data.size, input_data.data);
     LOG("Input file extension: %s\n", input_data.ext);
-    LOG("Input file data: %.*s\n", input_data.size, input_data.data);
 
     return input_data;
 }

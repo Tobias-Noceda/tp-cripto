@@ -13,6 +13,7 @@ else
 fi
 
 ./bin/stego -embed -p $img -in $msg -out out.bmp -stego $stg
+echo =========================================================
 ./bin/stego -extract -p out.bmp -out extracted -stego $stg
 
 echo

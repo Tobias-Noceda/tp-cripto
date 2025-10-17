@@ -81,7 +81,6 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
             for (size_t i = 0; i < 8; i++)
             {
                 char image_byte = fgetc(file);
-                LOG("Image byte: %02x\n", image_byte);
 
                 if (feof(file))
                 {
@@ -97,7 +96,6 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension)
                 byte |= image_byte & 1;
             }
 
-            LOG("Extension byte: %c\n", byte);
             (*extension)[length++] = byte;
         } while (byte != 0);
     }

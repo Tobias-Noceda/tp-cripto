@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 typedef struct {
-    uint32_t size;
+    uint32_t *size;
     char *data;
     char *ext;
 } Data;

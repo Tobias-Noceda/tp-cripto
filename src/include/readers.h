@@ -22,10 +22,14 @@ size_t get_output(FILE **file, const char *output, const char *input);
 /**
  * @brief Get the message data
  * 
+ * @note The caller is responsible for freeing the allocated memory. NOTHING but the memory pointer should be freed.
+ * @note Data pointers will reference the allocated memory block.
+ * 
  * @param input The input file
+ * @param memory Pointer to consecutive allocated memory
  * @return Data The message data
  */
-Data get_message(const char *input);
+Data get_message(const char *input, uint8_t **memory, uint32_t *length);
 
 /**
  * @brief Retrieve a steganographed message using LSB1 method
