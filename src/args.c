@@ -158,7 +158,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
             argp_error(state, "-out is required.");
 
         if (!arguments->stego.name)
-            argp_error(state, "-stego (LSB1 | LSB4 | LSBI) is required.");
+            argp_error(state, "-steg (LSB1 | LSB4 | LSBI) is required.");
 
         break;
 
