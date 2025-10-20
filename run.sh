@@ -12,8 +12,8 @@ else
     extension=".$extension"
 fi
 
-./bin/stego -embed -p $img -in $msg -out out.bmp -stego $stg
-./bin/stego -extract -p out.bmp -out extracted -stego $stg
+./bin/stego -embed -p $img -in $msg -out out.bmp -steg $stg
+./bin/stego -extract -p out.bmp -out extracted -steg $stg
 
 echo
 diff $msg extracted$extension

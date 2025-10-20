@@ -26,7 +26,7 @@ static enum {
     ARGK_EMBED = 'e',
     // -extract: Extract mode
     ARGK_EXTRACT = 'x',
-    // -stego: Stego method to use
+    // -steg: Stego method to use
     ARGK_STEGO = 's',
     // -p: Porter file
     ARGK_PORTER = 'p',
@@ -53,7 +53,7 @@ static struct argp_option options[] = {
         .doc = "Enable extraction mode (recover hidden data from an image)",
     },
     {
-        .name = "stego",
+        .name = "steg",
         .key = ARGK_STEGO,
         .arg = "STEGO_TYPE",
         .doc = "Select steganography method to use",
@@ -158,7 +158,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
             argp_error(state, "-out is required.");
 
         if (!arguments->stego.name)
-            argp_error(state, "-stego (LSB1 | LSB4 | LSBI) is required.");
+            argp_error(state, "-steg (LSB1 | LSB4 | LSBI) is required.");
 
         break;
 
