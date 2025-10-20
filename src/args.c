@@ -26,7 +26,7 @@ static enum {
     ARGK_EMBED = 'e',
     // -extract: Extract mode
     ARGK_EXTRACT = 'x',
-    // -stego: Stego method to use
+    // -steg: Stego method to use
     ARGK_STEGO = 's',
     // -p: Porter file
     ARGK_PORTER = 'p',
@@ -53,7 +53,7 @@ static struct argp_option options[] = {
         .doc = "Enable extraction mode (recover hidden data from an image)",
     },
     {
-        .name = "stego",
+        .name = "steg",
         .key = ARGK_STEGO,
         .arg = "STEGO_TYPE",
         .doc = "Select steganography method to use",
