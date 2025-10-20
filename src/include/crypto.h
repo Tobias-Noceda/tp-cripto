@@ -5,18 +5,28 @@
 #include <stdint.h>
 
 typedef enum {
-    AES_128,
+    AES_128 = 1,
     AES_192,
     AES_256,
     DES_3
 } CipherAlgo;
 
+typedef struct {
+    const char *name;
+    CipherAlgo algo;
+} CipherAlgoEnum;
+
 typedef enum {
-    ECB,
+    ECB = 1,
     CFB,
     OFB,
     CBC
 } CipherMode;
+
+typedef struct {
+    const char *name;
+    CipherMode mode;
+} CipherModeEnum;
 
 /**
  * @brief Encrypts the given plaintext using the specified pass.

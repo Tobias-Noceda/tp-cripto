@@ -1,123 +1,30 @@
-#include <crypto.h>
-#include <logs.h>
-#include <string.h>
+#include "crypto.h"
 
-#include <openssl/aes.h>
-#include <openssl/des.h>
-#include <openssl/evp.h>
+const EVP_CIPHER * get_aes_128_cipher(const CipherMode mode)
+{
+    if (!mode) {
+        perror("Invalid cipher mode for AES-128.");
+        return NULL;
+    }
 
-#define MAX_ENCR_LENGTH 1024
-#define SUCCESS 0
-#define FAILURE !SUCCESS
-#define AES_KEY_SIZE 16
+    const EVP_CIPHER *chiphers[] = {
+        EVP_aes_128_ecb(),
+        EVP_aes_128_cfb(),
+        EVP_aes_128_ofb(),
+        EVP_aes_128_cbc()
+    };
 
-
-// int AES_set_encrypt_key(const uint8_t *userKey, const int bits, AES_KEY *key);
+    return chiphers[mode - 1];
+};
 
 size_t aes_128_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext)
 {
-    int outl, templ;
-    uint8_t key[AES_KEY_SIZE];
-    uint8_t iv[AES_KEY_SIZE];
-
-    EVP_BytesToKey(EVP_aes_128_cbc(), EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv);
-
-    /* Inicializar contexto */
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-
-    EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv);
-
-    *ciphertext = malloc(MAX_ENCR_LENGTH); // Allocate memory for ciphertext
-    if (*ciphertext == NULL)
-    {
-        perror("Memory allocation failed");
-
-        EVP_CIPHER_CTX_free(ctx);
-
-        return 0;
-    }
-
-    EVP_EncryptUpdate(ctx, *ciphertext, &outl, plaintext, len);
-    EVP_EncryptFinal_ex(ctx, *ciphertext + outl, &templ);
-
-    outl += templ;
-
-    /* Borrar estructura de contexto */
-    EVP_CIPHER_CTX_free(ctx);
-
-    LOG("\nTamaño del texto cifrado: %d bytes.\n", outl);
-
-    return outl;
+    LOG("Using AES-128 encryption with mode %d\n", mode);
+    return enc(plaintext, len, pass, get_aes_128_cipher(mode), ciphertext);
 }
 
 size_t aes_128_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext)
 {
-    int outl, templ;
-    uint8_t key[AES_KEY_SIZE];
-    uint8_t iv[AES_KEY_SIZE];
-
-    EVP_BytesToKey(EVP_aes_128_cbc(), EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv);
-
-    /* Inicializar contexto */
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-
-    EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv);
-
-    *plaintext = malloc(MAX_ENCR_LENGTH); // Allocate memory for plaintext
-    if (*plaintext == NULL)
-    {
-        perror("Memory allocation failed");
-
-        EVP_CIPHER_CTX_free(ctx);
-
-        return 0;
-    }
-
-    EVP_DecryptUpdate(ctx, *plaintext, &outl, ciphertext, len);
-    EVP_DecryptFinal_ex(ctx, *plaintext + outl, &templ);
-
-    outl += templ;
-
-    /* Borrar estructura de contexto */
-    EVP_CIPHER_CTX_free(ctx);
-
-    LOG("\nTamaño del texto plano: %d bytes.\n", outl);
-
-    return outl;
-}
-
-size_t aes_192_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext)
-{
-    // Implement AES-192 encryption logic here
-    return 0; // Placeholder return value
-}
-
-size_t aes_192_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext)
-{
-    // Implement AES-192 decryption logic here
-    return 0; // Placeholder return value
-}
-
-size_t aes_256_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext)
-{
-    // Implement AES-256 encryption logic here
-    return 0; // Placeholder return value
-}
-
-size_t aes_256_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext)
-{
-    // Implement AES-256 decryption logic here
-    return 0; // Placeholder return value
-}
-
-size_t des_3_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext)
-{
-    // Implement 3DES encryption logic here
-    return 0; // Placeholder return value
-}
-
-size_t des_3_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext)
-{
-    // Implement 3DES decryption logic here
-    return 0; // Placeholder return value
+    LOG("Using AES-128 decryption with mode %d\n", mode);
+    return dec(ciphertext, len, pass, get_aes_128_cipher(mode), plaintext);
 }

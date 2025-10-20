@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include <stego.h>
+#include <crypto.h>
 
 /**
  * @brief Stego method structure
@@ -32,6 +33,12 @@ typedef struct Arguments
     char *input_path;
     // Output file (bmp when embedding, input file when extracting)
     char *output_path;
+    // Cipher algorithm
+    CipherAlgo algorithm;
+    // Cipher mode
+    CipherMode mode;
+    // Password for encryption/decryption
+    char *password;
 } Arguments;
 
 /**

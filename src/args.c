@@ -33,7 +33,13 @@ static enum {
     // -in: Input file (file to embed)
     ARGK_INPUT = 'i',
     // -out: Output file (bmp when embedding, input file when extracting)
-    ARGK_OUTPUT = 'o'
+    ARGK_OUTPUT = 'o',
+    // -a: Algorithm for encryption/decryption
+    ARGK_ALGORITHM = 'a',
+    // -m: Mode for block encryption/decryption
+    ARGK_MODE = 'm',
+    // -pass: Password for encryption/decryption
+    ARGK_PASSWORD = 'w'
 } ARGK __attribute__((unused));
 
 /**
@@ -76,6 +82,24 @@ static struct argp_option options[] = {
         .arg = "OUTPUT_FILE",
         .doc = "Output file (with .bmp extension when embedding, without extension when extracting)",
     },
+    {
+        .name = "algorithm",
+        .key = ARGK_ALGORITHM,
+        .arg = "ALGORITHM",
+        .doc = "Select encryption/decryption algorithm (AES_128, AES_192, AES_256, DES_3)",
+    },
+    {
+        .name = "mode",
+        .key = ARGK_MODE,
+        .arg = "MODE",
+        .doc = "Select cipher mode for encryption/decryption (ECB, CFB, OFB, CBC)",
+    },
+    {
+        .name = "pass",
+        .key = ARGK_PASSWORD,
+        .arg = "PASSWORD",
+        .doc = "Password for encryption/decryption",
+    },
     {0},
 };
 
@@ -98,6 +122,40 @@ static StegoMethod get_stego_method(const char *name)
         if (!strcasecmp(stego_methods[i].name, name))
             return stego_methods[i];
     return stego_methods[i];
+}
+
+static const CipherAlgoEnum cipher_algorithms[] = {
+    {"aes128", AES_128},
+    {"aes192", AES_192},
+    {"aes256", AES_256},
+    {"3des", DES_3},
+    {0},
+};
+
+static CipherAlgo get_cipher_algorithm(const char *name)
+{
+    size_t i;
+    for (i = 0; cipher_algorithms[i].name; i++)
+        if (!strcasecmp(cipher_algorithms[i].name, name))
+            return cipher_algorithms[i].algo;
+    return -1;
+}
+
+static const CipherModeEnum cipher_modes[] = {
+    {"ecb", ECB},
+    {"cfb", CFB},
+    {"ofb", OFB},
+    {"cbc", CBC},
+    {0},
+};
+
+static CipherMode get_cipher_mode(const char *name)
+{
+    size_t i;
+    for (i = 0; cipher_modes[i].name; i++)
+        if (!strcasecmp(cipher_modes[i].name, name))
+            return cipher_modes[i].mode;
+    return -1;
 }
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
@@ -132,6 +190,26 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         arguments->output_path = arg;
         break;
 
+    case ARGK_ALGORITHM:
+        arguments->algorithm = get_cipher_algorithm(arg);
+        if (arguments->algorithm == -1) {
+            argp_error(state, "Invalid cipher algorithm. Available algorithms: AES_128, AES_192, AES_256, DES_3.");
+
+            arguments->algorithm = 0;
+        }
+        break;
+
+    case ARGK_MODE:
+        arguments->mode = get_cipher_mode(arg);
+        if (arguments->mode == -1) {
+            argp_error(state, "Invalid cipher mode. Available modes: ECB, CFB, OFB, CBC.");
+        }
+        break;
+
+    case ARGK_PASSWORD:
+        arguments->password = arg;
+        break;
+
     case ARGP_KEY_ARG:
         /* No positional arguments are expected */
         argp_usage(state);
@@ -159,6 +237,19 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
         if (!arguments->stego.name)
             argp_error(state, "-stego (LSB1 | LSB4 | LSBI) is required.");
+
+        if (arguments->algorithm) {
+            if (!arguments->password)
+                argp_error(state, "-password is required when using encryption.");
+
+            if (arguments->mode == -1)
+                argp_error(state, "-mode is required when using encryption.");
+        }
+
+        if (arguments->mode || arguments->password) {
+            if (arguments->algorithm == -1)
+                argp_error(state, "-algorithm is required when mode or password is specified.");
+        }
 
         break;
 

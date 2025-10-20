@@ -12,12 +12,14 @@
 #include <bmp.h>
 #include <crypto.h>
 
+static const encrypt get_encrypt_func(CipherAlgo algo);
+static const decrypt get_decrypt_func(CipherAlgo algo);
+
 int main(int argc, char *argv[])
 {
     Arguments args = get_args(argc, argv);
     uint8_t *ciphertext = NULL;
     size_t ciphertext_len = 0;
-    bool use_encryption = false;
 
     if (args.embed)
     {
@@ -80,9 +82,18 @@ int main(int argc, char *argv[])
         uint32_t msg_len;
         uint8_t *msg_ptr;
 
-        if (use_encryption) {
-            ciphertext_len = aes_128_encrypt(memory, length, (uint8_t *) "Tomi", CFB, &ciphertext);
-            
+        if (args.algorithm) {
+            encrypt encrypt_func = get_encrypt_func(args.algorithm);
+            if (encrypt_func == NULL) {
+                fprintf(stderr, "Unsupported encryption algorithm.\n");
+
+                free(memory);
+                fclose(porter);
+
+                return EXIT_FAILURE;
+            }
+            ciphertext_len = encrypt_func(memory, length, (uint8_t *) args.password, args.mode, &ciphertext);
+
             msg_len = ciphertext_len;
             msg_ptr = ciphertext;
 
@@ -130,7 +141,7 @@ int main(int argc, char *argv[])
         // free memory and close files
         free(memory);
         fclose(porter);
-        if (use_encryption) {
+        if (ciphertext != NULL) {
             free(ciphertext);
         }
     }
@@ -159,12 +170,13 @@ int main(int argc, char *argv[])
         LOG("BMP Header size: %u\n", header_size);
 
         char *extension = NULL;
-        Stego *stego = args.stego.retrieve(porter, header_size, use_encryption ? NULL : &extension);
+        Stego *stego = args.stego.retrieve(porter, header_size, args.algorithm ? NULL : &extension);
         fclose(porter);
 
-        if (use_encryption) {
+        if (args.algorithm) {
+            decrypt decrypt_func = get_decrypt_func(args.algorithm);
             uint8_t *plaintext = NULL;
-            aes_128_decrypt(stego->data, stego->size, (uint8_t *) "Tomi", CFB, &plaintext);
+            decrypt_func(stego->data, stego->size, (uint8_t *) args.password, args.mode, &plaintext);
 
             if (plaintext != NULL) {
                 Data decrypted_data = {
@@ -258,4 +270,32 @@ int main(int argc, char *argv[])
     }
 
     return EXIT_SUCCESS;
+}
+
+static const encrypt encrypt_funcs[] = {
+    aes_128_encrypt,
+    aes_192_encrypt,
+    aes_256_encrypt,
+    des_3_encrypt
+};
+
+static const encrypt get_encrypt_func(CipherAlgo algo) {
+    if (algo < AES_128 || algo > DES_3) {
+        return NULL;
+    }
+    return encrypt_funcs[algo - 1];
+}
+
+static const decrypt decrypt_funcs[] = {
+    aes_128_decrypt,
+    aes_192_decrypt,
+    aes_256_decrypt,
+    des_3_decrypt
+};
+
+static const decrypt get_decrypt_func(CipherAlgo algo) {
+    if (algo < AES_128 || algo > DES_3) {
+        return NULL;
+    }
+    return decrypt_funcs[algo - 1];
 }
