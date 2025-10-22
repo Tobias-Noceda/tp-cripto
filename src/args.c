@@ -9,7 +9,7 @@
 
 /**
  * @brief argp option parser
- * 
+ *
  * @param key The option key
  * @param arg The option argument
  * @param state The argp state
@@ -124,24 +124,24 @@ static StegoMethod get_stego_method(const char *name)
     return stego_methods[i];
 }
 
-static const CipherAlgoEnum cipher_algorithms[] = {
-    {"aes128", AES_128},
-    {"aes192", AES_192},
-    {"aes256", AES_256},
-    {"3des", DES_3},
+static const CipherAlgorithms cipher_algorithms[] = {
+    {"aes128", aes_128_encrypt, aes_128_decrypt},
+    {"aes192", aes_192_encrypt, aes_192_decrypt},
+    {"aes256", aes_256_encrypt, aes_256_decrypt},
+    {"3des", des_3_encrypt, des_3_decrypt},
     {0},
 };
 
-static CipherAlgo get_cipher_algorithm(const char *name)
+static CipherAlgorithms get_cipher_algorithms(const char *name)
 {
     size_t i;
     for (i = 0; cipher_algorithms[i].name; i++)
         if (!strcasecmp(cipher_algorithms[i].name, name))
-            return cipher_algorithms[i].algo;
-    return -1;
+            return cipher_algorithms[i];
+    return cipher_algorithms[i];
 }
 
-static const CipherModeEnum cipher_modes[] = {
+static const CipherMode cipher_modes[] = {
     {"ecb", ECB},
     {"cfb", CFB},
     {"ofb", OFB},
@@ -154,8 +154,8 @@ static CipherMode get_cipher_mode(const char *name)
     size_t i;
     for (i = 0; cipher_modes[i].name; i++)
         if (!strcasecmp(cipher_modes[i].name, name))
-            return cipher_modes[i].mode;
-    return -1;
+            return cipher_modes[i];
+    return cipher_modes[i];
 }
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
@@ -191,22 +191,21 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         break;
 
     case ARGK_ALGORITHM:
-        arguments->algorithm = get_cipher_algorithm(arg);
-        if (arguments->algorithm == -1) {
+        arguments->ssl = true;
+        arguments->algorithm = get_cipher_algorithms(arg);
+        if (!arguments->algorithm.name)
             argp_error(state, "Invalid cipher algorithm. Available algorithms: AES_128, AES_192, AES_256, DES_3.");
-
-            arguments->algorithm = 0;
-        }
         break;
 
     case ARGK_MODE:
+        arguments->ssl = true;
         arguments->mode = get_cipher_mode(arg);
-        if (arguments->mode == -1) {
+        if (!arguments->mode.name)
             argp_error(state, "Invalid cipher mode. Available modes: ECB, CFB, OFB, CBC.");
-        }
         break;
 
     case ARGK_PASSWORD:
+        arguments->ssl = true;
         arguments->password = arg;
         break;
 
@@ -238,17 +237,17 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         if (!arguments->stego.name)
             argp_error(state, "-stego (LSB1 | LSB4 | LSBI) is required.");
 
-        if (arguments->algorithm) {
+        // If ssl is enabled, all three must be defined
+        if (arguments->ssl)
+        {
+            if (!arguments->algorithm.name)
+                argp_error(state, "-algorithm is required when using encryption.");
+
+            if (!arguments->mode.name)
+                argp_error(state, "-mode is required when using encryption.");
+
             if (!arguments->password)
                 argp_error(state, "-password is required when using encryption.");
-
-            if (arguments->mode == -1)
-                argp_error(state, "-mode is required when using encryption.");
-        }
-
-        if (arguments->mode || arguments->password) {
-            if (arguments->algorithm == -1)
-                argp_error(state, "-algorithm is required when mode or password is specified.");
         }
 
         break;
@@ -285,7 +284,8 @@ Arguments get_args(int argc, char *argv[])
         if (argv[i][0] == '-' && strlen(argv[i]) > 2 && argv[i][1] != '-')
         {
             argv[i] = prepend_dash(argv[i]);
-            if (!argv[i] || !push_ptr_list(&head, &tail, argv[i])) {
+            if (!argv[i] || !push_ptr_list(&head, &tail, argv[i]))
+            {
                 free(argv[i]); // free(NULL) is safe
                 free_ptr_list(head);
                 exit(EXIT_FAILURE);

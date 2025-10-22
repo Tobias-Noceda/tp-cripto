@@ -16,6 +16,19 @@ typedef struct
     Reader retrieve;
 } StegoMethod;
 
+typedef struct
+{
+    const char *name;
+    Encrypt encrypt;
+    Decrypt decrypt;
+} CipherAlgorithms;
+
+typedef struct
+{
+    const char *name;
+    CIPHER_MODES val;
+} CipherMode;
+
 /**
  * @brief The structure that holds the program arguments
  */
@@ -33,8 +46,10 @@ typedef struct Arguments
     char *input_path;
     // Output file (bmp when embedding, input file when extracting)
     char *output_path;
+    // Encryption enabled
+    bool ssl;
     // Cipher algorithm
-    CipherAlgo algorithm;
+    CipherAlgorithms algorithm;
     // Cipher mode
     CipherMode mode;
     // Password for encryption/decryption

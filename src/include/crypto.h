@@ -5,28 +5,11 @@
 #include <stdint.h>
 
 typedef enum {
-    AES_128 = 1,
-    AES_192,
-    AES_256,
-    DES_3
-} CipherAlgo;
-
-typedef struct {
-    const char *name;
-    CipherAlgo algo;
-} CipherAlgoEnum;
-
-typedef enum {
     ECB = 1,
     CFB,
     OFB,
     CBC
-} CipherMode;
-
-typedef struct {
-    const char *name;
-    CipherMode mode;
-} CipherModeEnum;
+} CIPHER_MODES;
 
 /**
  * @brief Encrypts the given plaintext using the specified pass.
@@ -38,7 +21,7 @@ typedef struct {
  * @param ciphertext A pointer to the location where the ciphertext will be stored.
  * @return The length of the ciphertext.
  */
-typedef size_t (*encrypt)(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext);
+typedef size_t (*Encrypt)(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **ciphertext);
 
 /**
  * @brief Decrypts the given ciphertext using the specified pass.
@@ -50,18 +33,18 @@ typedef size_t (*encrypt)(const uint8_t *plaintext, const size_t len, const uint
  * @param plaintext A pointer to the location where the plaintext will be stored.
  * @return The length of the plaintext.
  */
-typedef size_t (*decrypt)(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext);
+typedef size_t (*Decrypt)(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **plaintext);
 
-size_t aes_128_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext);
-size_t aes_128_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext);
+size_t aes_128_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **ciphertext);
+size_t aes_128_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **plaintext);
 
-size_t aes_192_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext);
-size_t aes_192_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext);
+size_t aes_192_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **ciphertext);
+size_t aes_192_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **plaintext);
 
-size_t aes_256_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext);
-size_t aes_256_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext);
+size_t aes_256_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **ciphertext);
+size_t aes_256_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **plaintext);
 
-size_t des_3_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **ciphertext);
-size_t des_3_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CipherMode mode, uint8_t **plaintext);
+size_t des_3_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **ciphertext);
+size_t des_3_decrypt(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **plaintext);
 
-#endif // CRYPTO_H
+#endif
