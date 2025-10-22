@@ -46,3 +46,13 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension);
  * @return char* The retrieved message
  */
 Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension);
+
+/**
+ * @brief Retrieve a steganographed message using LSBI method
+ *
+ * @param file The file pointer to read from
+ * @param offset The offset to start reading from
+ * @param extension Pointer to store the file extension
+ * @return char* The retrieved message
+ */
+Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension);
