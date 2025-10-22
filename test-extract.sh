@@ -8,7 +8,8 @@ rm -f test.png
 
 if cmp -s files/itba.output.png test.png
 then
-    echo -e "\t\e[32mPASS\e[0m $stego"
+    echo -e "\t\e[32mPASS\e[0m $stego EXT"
 else
-    echo -e "\t\e[31mFAIL\e[0m $stego"
+    echo -e "\t\e[31mFAIL\e[0m $stego EXT"
+    false
 fi
