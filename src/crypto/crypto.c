@@ -1,82 +1,114 @@
-#include <crypto.h>
+#include "crypto.h"
+
 #include <logs.h>
+
 #include <string.h>
 
 #include <openssl/aes.h>
 #include <openssl/des.h>
 #include <openssl/evp.h>
+#include <openssl/err.h>
 
-#define MAX_ENCR_LENGTH 1024
-#define SUCCESS 0
-#define FAILURE !SUCCESS
-#define AES_KEY_SIZE 16
+static inline int OPENSSL_ERR(EVP_CIPHER_CTX *ctx)
+{
+    ERR_print_errors_fp(stderr);
+    EVP_CIPHER_CTX_free(ctx);
+    return 0;
+}
 
-// int AES_set_encrypt_key(const uint8_t *userKey, const int bits, AES_KEY *key);
+static inline int CUSTOM_ERR(EVP_CIPHER_CTX *ctx, char *msg)
+{
+    perror(msg);
+    EVP_CIPHER_CTX_free(ctx);
+    return 0;
+}
 
 size_t enc(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **ciphertext)
 {
-    int outl, templ;
-    uint8_t key[AES_KEY_SIZE];
-    uint8_t iv[AES_KEY_SIZE];
+    uint8_t key[EVP_MAX_KEY_LENGTH];
+    uint8_t iv[EVP_MAX_IV_LENGTH];
+    if (!EVP_BytesToKey(cipher, EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv))
+    {
+        return OPENSSL_ERR(NULL);
+    }
 
-    EVP_BytesToKey(cipher, EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv);
-
-    /* Inicializar contexto */
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+    {
+        return OPENSSL_ERR(NULL);
+    }
 
-    EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv);
+    if (!EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv))
+    {
+        return OPENSSL_ERR(ctx);
+    }
 
-    *ciphertext = malloc(MAX_ENCR_LENGTH); // Allocate memory for ciphertext
+    int buffer = len + EVP_CIPHER_get_block_size(cipher) - 1;
+
+    *ciphertext = malloc(buffer);
     if (*ciphertext == NULL)
     {
-        perror("Memory allocation failed");
-
-        EVP_CIPHER_CTX_free(ctx);
-
+        CUSTOM_ERR(ctx, "Memory allocation failed");
         return 0;
     }
 
-    EVP_EncryptUpdate(ctx, *ciphertext, &outl, plaintext, len);
-    EVP_EncryptFinal_ex(ctx, *ciphertext + outl, &templ);
+    int output_length = 0;
+    if (!EVP_EncryptUpdate(ctx, *ciphertext, &output_length, plaintext, len))
+    {
+        return OPENSSL_ERR(ctx);
+    }
 
-    outl += templ;
+    int padding_length = 0;
+    if (!EVP_EncryptFinal_ex(ctx, *ciphertext + output_length, &padding_length))
+    {
+        return OPENSSL_ERR(ctx);
+    }
 
-    /* Borrar estructura de contexto */
     EVP_CIPHER_CTX_free(ctx);
 
-    return outl;
+    return output_length + padding_length;
 }
 
 size_t dec(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **plaintext)
 {
-    int outl, templ;
-    uint8_t key[AES_KEY_SIZE];
-    uint8_t iv[AES_KEY_SIZE];
+    uint8_t key[EVP_MAX_KEY_LENGTH];
+    uint8_t iv[EVP_MAX_IV_LENGTH];
+    if (!EVP_BytesToKey(cipher, EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv))
+    {
+        return OPENSSL_ERR(NULL);
+    }
 
-    EVP_BytesToKey(cipher, EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv);
-
-    /* Inicializar contexto */
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+    {
+        return OPENSSL_ERR(NULL);
+    }
 
-    EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv);
+    if (!EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv))
+    {
+        return OPENSSL_ERR(ctx);
+    }
 
-    *plaintext = malloc(MAX_ENCR_LENGTH); // Allocate memory for plaintext
+    *plaintext = malloc(len);
     if (*plaintext == NULL)
     {
-        perror("Memory allocation failed");
-
-        EVP_CIPHER_CTX_free(ctx);
-
+        CUSTOM_ERR(ctx, "Memory allocation failed");
         return 0;
     }
 
-    EVP_DecryptUpdate(ctx, *plaintext, &outl, ciphertext, len);
-    EVP_DecryptFinal_ex(ctx, *plaintext + outl, &templ);
+    int output_length = 0;
+    if (!EVP_DecryptUpdate(ctx, *plaintext, &output_length, ciphertext, len))
+    {
+        return OPENSSL_ERR(ctx);
+    }
 
-    outl += templ;
+    int padding_length = 0;
+    if (!EVP_DecryptFinal_ex(ctx, *plaintext + output_length, &padding_length))
+    {
+        return OPENSSL_ERR(ctx);
+    }
 
-    /* Borrar estructura de contexto */
     EVP_CIPHER_CTX_free(ctx);
 
-    return outl;
+    return output_length + padding_length;
 }
