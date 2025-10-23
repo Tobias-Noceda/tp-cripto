@@ -10,7 +10,7 @@ const EVP_CIPHER * get_des_3_cipher(const CIPHER_MODES mode)
     };
 
     return chiphers[mode];
-};
+}
 
 size_t des_3_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **ciphertext)
 {
