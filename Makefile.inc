@@ -1,2 +1,2 @@
 CC = gcc
-CFLAGS = -Wall -fdiagnostics-color=always -lssl -lcrypto -lm -largp
+CFLAGS = -std=gnu23 -pedantic -Wall -fdiagnostics-color=always -lssl -lcrypto -lm -largp
