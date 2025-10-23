@@ -15,17 +15,15 @@ else
     extension=".$extension"
 fi
 
+ssl=""
 if [ -n "$algo" ] && [ -n "$mode" ] && [ -n "$pass" ]; then
-    echo =========================================================
-    ./bin/stego -embed -p $img -in $msg -out out.bmp -steg $stg -alg $algo -mode $mode -pass $pass
-    echo =========================================================
-    ./bin/stego -extract -p out.bmp -out extracted -steg $stg -alg $algo -mode $mode -pass $pass
-else
-    echo =========================================================
-    ./bin/stego -embed -p $img -in $msg -out out.bmp -steg $stg
-    echo =========================================================
-    ./bin/stego -extract -p out.bmp -out extracted -steg $stg
+    ssl="-alg $algo -mode $mode -pass $pass"
 fi
+
+echo =========================================================
+./bin/stego -embed -p $img -in $msg -out out.bmp -steg $stg $ssl
+echo =========================================================
+./bin/stego -extract -p out.bmp -out extracted -steg $stg $ssl
 
 echo
 diff $msg extracted$extension
