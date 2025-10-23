@@ -17,14 +17,14 @@ fi
 
 if [ -n "$algo" ] && [ -n "$mode" ] && [ -n "$pass" ]; then
     echo =========================================================
-    ./bin/stego -embed -p $img -in $msg -out out.bmp -stego $stg -alg $algo -mode $mode -pass $pass
+    ./bin/stego -embed -p $img -in $msg -out out.bmp -steg $stg -alg $algo -mode $mode -pass $pass
     echo =========================================================
-    ./bin/stego -extract -p out.bmp -out extracted -stego $stg -alg $algo -mode $mode -pass $pass
+    ./bin/stego -extract -p out.bmp -out extracted -steg $stg -alg $algo -mode $mode -pass $pass
 else
     echo =========================================================
-    ./bin/stego -embed -p $img -in $msg -out out.bmp -stego $stg
+    ./bin/stego -embed -p $img -in $msg -out out.bmp -steg $stg
     echo =========================================================
-    ./bin/stego -extract -p out.bmp -out extracted -stego $stg
+    ./bin/stego -extract -p out.bmp -out extracted -steg $stg
 fi
 
 echo

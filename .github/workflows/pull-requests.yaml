@@ -14,5 +14,5 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
-            chmod +x test.sh
+            chmod +x test.sh test-embed.sh test-extract.sh
             make clean check DEBUG=0
