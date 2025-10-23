@@ -86,7 +86,7 @@ static struct argp_option options[] = {
         .name = "algorithm",
         .key = ARGK_ALGORITHM,
         .arg = "ALGORITHM",
-        .doc = "Select encryption/decryption algorithm (AES_128, AES_192, AES_256, DES_3)",
+        .doc = "Select encryption/decryption algorithm (aes128, aes192, aes256, 3des)",
     },
     {
         .name = "mode",
@@ -194,7 +194,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         arguments->ssl = true;
         arguments->algorithm = get_cipher_algorithms(arg);
         if (!arguments->algorithm.name)
-            argp_error(state, "Invalid cipher algorithm. Available algorithms: AES_128, AES_192, AES_256, DES_3.");
+            argp_error(state, "Invalid cipher algorithm. Available algorithms: aes128, aes192, aes256, 3des.");
         break;
 
     case ARGK_MODE:
