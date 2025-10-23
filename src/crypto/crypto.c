@@ -2,6 +2,7 @@
 
 #include <logs.h>
 
+#include <stdbool.h>
 #include <string.h>
 
 #include <openssl/aes.h>
@@ -23,92 +24,54 @@ static inline int CUSTOM_ERR(EVP_CIPHER_CTX *ctx, char *msg)
     return 0;
 }
 
-size_t enc(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **ciphertext)
+/**
+ * @brief Converts plaintext to ciphertext and vice versa using OpenSSL EVP interface.
+ *
+ * @param in The input data (plaintext or ciphertext).
+ * @param len Length of the input data.
+ * @param pass The password used for key derivation.
+ * @param cipher The EVP_CIPHER to use (e.g., EVP_aes_256_cbc()).
+ * @param out Pointer to store the output data (ciphertext or plaintext).
+ * @param encrypt Boolean flag indicating whether to encrypt (true) or decrypt (false).
+ * @return size_t Length of the output data, or 0 on error.
+ */
+static size_t ssl(const uint8_t *in, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **out, bool encrypt)
 {
     uint8_t key[EVP_MAX_KEY_LENGTH];
     uint8_t iv[EVP_MAX_IV_LENGTH];
     if (!EVP_BytesToKey(cipher, EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv))
-    {
         return OPENSSL_ERR(NULL);
-    }
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
-    {
         return OPENSSL_ERR(NULL);
-    }
 
-    if (!EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv))
-    {
+    if (!EVP_CipherInit_ex2(ctx, cipher, key, iv, encrypt ? 1 : 0, NULL))
         return OPENSSL_ERR(ctx);
-    }
 
-    int buffer = len + EVP_CIPHER_get_block_size(cipher) - 1;
-
-    *ciphertext = malloc(buffer);
-    if (*ciphertext == NULL)
-    {
-        CUSTOM_ERR(ctx, "Memory allocation failed");
-        return 0;
-    }
+    *out = malloc(len + EVP_CIPHER_get_block_size(cipher));
+    if (*out == NULL)
+        return CUSTOM_ERR(ctx, "Memory allocation failed");
 
     int output_length = 0;
-    if (!EVP_EncryptUpdate(ctx, *ciphertext, &output_length, plaintext, len))
-    {
+    if (!EVP_CipherUpdate(ctx, *out, &output_length, in, len))
         return OPENSSL_ERR(ctx);
-    }
 
     int padding_length = 0;
-    if (!EVP_EncryptFinal_ex(ctx, *ciphertext + output_length, &padding_length))
-    {
+    if (!EVP_CipherFinal_ex(ctx, *out + output_length, &padding_length))
         return OPENSSL_ERR(ctx);
-    }
 
     EVP_CIPHER_CTX_free(ctx);
 
     return output_length + padding_length;
 }
 
-size_t dec(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **plaintext)
+inline size_t enc(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **ciphertext)
 {
-    uint8_t key[EVP_MAX_KEY_LENGTH];
-    uint8_t iv[EVP_MAX_IV_LENGTH];
-    if (!EVP_BytesToKey(cipher, EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv))
-    {
-        return OPENSSL_ERR(NULL);
-    }
+    return ssl(plaintext, len, pass, cipher, ciphertext, true);
+}
 
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    if (!ctx)
-    {
-        return OPENSSL_ERR(NULL);
-    }
-
-    if (!EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv))
-    {
-        return OPENSSL_ERR(ctx);
-    }
-
-    *plaintext = malloc(len);
-    if (*plaintext == NULL)
-    {
-        CUSTOM_ERR(ctx, "Memory allocation failed");
-        return 0;
-    }
-
-    int output_length = 0;
-    if (!EVP_DecryptUpdate(ctx, *plaintext, &output_length, ciphertext, len))
-    {
-        return OPENSSL_ERR(ctx);
-    }
-
-    int padding_length = 0;
-    if (!EVP_DecryptFinal_ex(ctx, *plaintext + output_length, &padding_length))
-    {
-        return OPENSSL_ERR(ctx);
-    }
-
-    EVP_CIPHER_CTX_free(ctx);
-
-    return output_length + padding_length;
+inline size_t dec(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **plaintext)
+{
+    return ssl(ciphertext, len, pass, cipher, plaintext, false);
 }
