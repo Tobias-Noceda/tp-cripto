@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 typedef enum {
-    ECB = 1,
+    ECB = 0,
     CFB,
     OFB,
     CBC

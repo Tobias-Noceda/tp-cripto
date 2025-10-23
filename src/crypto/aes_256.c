@@ -2,11 +2,6 @@
 
 const EVP_CIPHER * get_aes_256_cipher(const CIPHER_MODES mode)
 {
-    if (!mode) {
-        perror("Invalid cipher mode for AES-256.");
-        return NULL;
-    }
-
     const EVP_CIPHER *chiphers[] = {
         EVP_aes_256_ecb(),
         EVP_aes_256_cfb(),
@@ -14,7 +9,7 @@ const EVP_CIPHER * get_aes_256_cipher(const CIPHER_MODES mode)
         EVP_aes_256_cbc()
     };
 
-    return chiphers[mode - 1];
+    return chiphers[mode];
 };
 
 size_t aes_256_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **ciphertext)

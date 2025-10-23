@@ -2,11 +2,6 @@
 
 const EVP_CIPHER * get_des_3_cipher(const CIPHER_MODES mode)
 {
-    if (!mode) {
-        perror("Invalid cipher mode for 3DES.");
-        return NULL;
-    }
-
     const EVP_CIPHER *chiphers[] = {
         EVP_des_ede3_ecb(),
         EVP_des_ede3_cfb(),
@@ -14,7 +9,7 @@ const EVP_CIPHER * get_des_3_cipher(const CIPHER_MODES mode)
         EVP_des_ede3_cbc()
     };
 
-    return chiphers[mode - 1];
+    return chiphers[mode];
 };
 
 size_t des_3_encrypt(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const CIPHER_MODES mode, uint8_t **ciphertext)
