@@ -9,7 +9,7 @@
 /**
  * @brief Encrypts the given plaintext using the specified cipher and password.
  * Uses OpenSSL EVP interface.
- * 
+ *
  * @param plaintext The data to encrypt.
  * @param len Length of the plaintext data.
  * @param pass Password used for encryption (NULL-terminated string).
@@ -23,7 +23,7 @@ size_t enc(const uint8_t *plaintext, const size_t len, const uint8_t *pass, cons
 /**
  * @brief Encrypts the given plaintext using the specified cipher and password.
  * Uses OpenSSL EVP interface.
- * 
+ *
  * @param ciphertext The data to decrypt.
  * @param len Length of the ciphertext data.
  * @param pass Password used for decryption (NULL-terminated string).
