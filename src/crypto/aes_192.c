@@ -1,12 +1,12 @@
 #include "crypto.h"
 
-const EVP_CIPHER * get_aes_192_cipher(const CIPHER_MODES mode)
+const EVP_CIPHER *get_aes_192_cipher(const CIPHER_MODES mode)
 {
     const EVP_CIPHER *chiphers[] = {
         EVP_aes_192_ecb(),
         EVP_aes_192_cfb(),
         EVP_aes_192_ofb(),
-        EVP_aes_192_cbc()
+        EVP_aes_192_cbc(),
     };
 
     return chiphers[mode];
