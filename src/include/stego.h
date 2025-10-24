@@ -6,6 +6,7 @@
 
 typedef struct {
     uint32_t size;
+    uint32_t *sizep;
     char *data;
     char *ext;
 } Data;

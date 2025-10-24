@@ -31,34 +31,10 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        Data input_data = get_message(args.input_path);
-        if (input_data.data == NULL)
-        {
-            fclose(porter);
-            return EXIT_FAILURE;
-        }
-        if (input_data.ext == NULL)
-        {
-            perror("File extension couldn't be determined");
-            free(input_data.data);
-            fclose(porter);
-            return EXIT_FAILURE;
-        }
-        if (input_data.size == 0)
-        {
-            perror("Input file cannot be empty.");
-            free(input_data.data);
-            free(input_data.ext);
-            fclose(porter);
-            return EXIT_FAILURE;
-        }
-
         const BITMAPFILEHEADER header = get_bmp_file_header(porter);
         if (header.signature != 0x4D42)
         {
             fprintf(stderr, "Porter file is not a valid BMP file.\n");
-            free(input_data.data);
-            free(input_data.ext);
             fclose(porter);
             return EXIT_FAILURE;
         }
@@ -66,43 +42,30 @@ int main(int argc, char *argv[])
         uint32_t header_size = header.offset;
         fseek(porter, header_size, SEEK_SET); // Skip BMP header
 
-        // turn the size into 4 bytes
-        uint8_t size_bytes[4];
-        size_bytes[0] = (input_data.size >> 24) & 0xFF;
-        size_bytes[1] = (input_data.size >> 16) & 0xFF;
-        size_bytes[2] = (input_data.size >> 8) & 0xFF;
-        size_bytes[3] = input_data.size & 0xFF;
+        uint8_t *memory;
+        uint32_t length;
+        Data input_data = get_message(args.input_path, &memory, &length);
+        if (!memory)
+        {
+            perror("Failed to get input message");
+            fclose(porter);
+            return EXIT_FAILURE;
+        }
 
-        if (args.stego.embed(porter, size_bytes, 4) == 0)
+        if (!args.stego.embed(porter, memory, length))
         {
-            fprintf(stderr, "Failed to embed size data.\n");
-            free(input_data.data);
-            free(input_data.ext);
+            fprintf(stderr, "Failed to embed data.\n");
+
+            free(memory);
             fclose(porter);
-            return EXIT_FAILURE;
-        }
-        if (args.stego.embed(porter, (uint8_t *)input_data.data, input_data.size) == 0)
-        {
-            fprintf(stderr, "Failed to embed input data.\n");
-            free(input_data.data);
-            free(input_data.ext);
-            fclose(porter);
-            return EXIT_FAILURE;
-        }
-        if (args.stego.embed(porter, (uint8_t *)input_data.ext, strlen(input_data.ext) + 1) == 0)
-        {
-            fprintf(stderr, "Failed to embed file extension data.\n");
-            free(input_data.data);
-            free(input_data.ext);
-            fclose(porter);
+
             return EXIT_FAILURE;
         }
 
         printf("Data embedded successfully into '%s'.\n", args.output_path);
 
         // free memory and close files
-        free(input_data.data);
-        free(input_data.ext);
+        free(memory);
         fclose(porter);
     }
     else
