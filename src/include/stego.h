@@ -6,6 +6,7 @@
 
 typedef struct {
     uint32_t size;
+    // little endian pointer to data size, preserved for legacy reasons
     uint32_t *sizep;
     char *data;
     char *ext;
