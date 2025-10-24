@@ -53,6 +53,6 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension);
  * @param file The file pointer to read from
  * @param offset The offset to start reading from
  * @param extension Pointer to store the file extension
- * @return char* The retrieved message
+ * @return Stego* The retrieved message
  */
 Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension);

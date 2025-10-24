@@ -28,7 +28,7 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
     if (fread(pattern_bytes, sizeof(uint8_t), PATTERN_SIZE, file) != PATTERN_SIZE)
     {
         perror("Not enough bytes to read pattern");
-        return 0;
+        return NULL;
     }
 
     for(int i = 0 ; i < PATTERN_SIZE ; i++)
@@ -55,7 +55,7 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
     if (fread(length_bytes, sizeof(uint8_t), bytes_count, file) != bytes_count)
     {
         perror("Not enough bytes to read length");
-        return 0;
+        return NULL;
     }
 
     uint32_t message_length = 0;

@@ -125,7 +125,7 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
             data[curr_byte] = (data[curr_byte] & 0xFE) | bit;
             curr_byte++;
             curr_byte_input++;
-            if (curr_byte > bytes_needed)
+            if (curr_byte >= bytes_needed)
             {
                 fprintf(stderr, "Error: Overflow during embedding\n");
                 free(pattern_data);
