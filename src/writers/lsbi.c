@@ -3,7 +3,7 @@
 #include <math.h>
 
 #define PATTERN_SIZE 4
-#define LSB(x,n) ( ((x) >> (n) << (n)) ^ (x) )
+#define LSB(x, n) ((x) & ((1 << (n)) - 1))
 
 size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
 {
