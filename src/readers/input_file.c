@@ -77,8 +77,8 @@ Data get_message(const char *input, uint8_t **memory, uint32_t *length)
     memcpy(input_data.ext, dot, strlen(dot) + 1); // Copy extension with null terminator
 
     LOG("Input file size: %u bytes\n", input_data.size);
-    LOG("Input file extension: %s\n", input_data.ext);
     LOG("Input file data: %.*s\n", input_data.size, input_data.data);
+    LOG("Input file extension: %s\n", input_data.ext);
 
     return input_data;
 }
