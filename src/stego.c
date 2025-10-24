@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
         LOG("Output file: %s\n", args.output_path);
         LOG("Stego type: %s\n", args.stego.name);
 
-        
         FILE *porter;
         long porter_size = get_output(&porter, args.output_path, args.porter_path);
         if (porter_size == 0)
@@ -34,7 +33,7 @@ int main(int argc, char *argv[])
             perror("Failed to open porter file");
             return EXIT_FAILURE;
         }
-        
+
         uint8_t *memory;
         uint32_t length;
         Data input_data = get_message(args.input_path, &memory, &length);
@@ -78,7 +77,8 @@ int main(int argc, char *argv[])
         uint32_t msg_len;
         uint8_t *msg_ptr;
 
-        if (args.ssl) {
+        if (args.ssl)
+        {
             ciphertext_len = args.algorithm.encrypt(memory, length, (uint8_t *)args.password, args.mode.val, &ciphertext);
 
             msg_len = ciphertext_len;
@@ -86,12 +86,15 @@ int main(int argc, char *argv[])
 
             LOG("Encrypted data size: %u bytes\n", msg_len);
             LOG("Encrypted data (first 16 bytes): ");
-            for (size_t i = 0; i < (msg_len < 16 ? msg_len : 16); i++) {
+            for (size_t i = 0; i < (msg_len < 16 ? msg_len : 16); i++)
+            {
                 LOG("%02x", msg_ptr[i]);
             }
             LOG("\n");
             length = msg_len;
-        } else {
+        }
+        else
+        {
             length -= sizeof(uint32_t);
             msg_len = *input_data.size;
             msg_ptr = memory + sizeof(uint32_t);
@@ -110,7 +113,7 @@ int main(int argc, char *argv[])
 
             free(memory);
             fclose(porter);
-            
+
             return EXIT_FAILURE;
         }
         if (!args.stego.embed(porter, msg_ptr, length))
@@ -127,10 +130,8 @@ int main(int argc, char *argv[])
 
         // free memory and close files
         free(memory);
+        free(ciphertext);
         fclose(porter);
-        if (ciphertext != NULL) {
-            free(ciphertext);
-        }
     }
     else
     {
@@ -160,24 +161,26 @@ int main(int argc, char *argv[])
         Stego *stego = args.stego.retrieve(porter, header_size, args.ssl ? NULL : &extension);
         fclose(porter);
 
-        if (args.ssl) {
+        if (args.ssl)
+        {
             uint8_t *plaintext = NULL;
-            args.algorithm.decrypt(stego->data, stego->size, (uint8_t *) args.password, args.mode.val, &plaintext);
+            args.algorithm.decrypt(stego->data, stego->size, (uint8_t *)args.password, args.mode.val, &plaintext);
 
-            if (plaintext != NULL) {
+            if (plaintext != NULL)
+            {
                 Data decrypted_data = {
                     .size = (uint32_t *)plaintext,
                     .data = (char *)(plaintext + sizeof(uint32_t)),
-                    .ext = (char *)(plaintext + sizeof(uint32_t) + * (uint32_t *)plaintext)
-                };
+                    .ext = (char *)(plaintext + sizeof(uint32_t) + *(uint32_t *)plaintext)};
 
                 LOG("Decrypted data size: %u bytes\n", *decrypted_data.size);
                 LOG("Decrypted data content: %.*s\n", (int)*decrypted_data.size, decrypted_data.data);
                 LOG("Decrypted data extension: %s\n", decrypted_data.ext);
-                
+
                 free(stego);
                 stego = malloc(sizeof(Stego) + *decrypted_data.size);
-                if (stego == NULL) {
+                if (stego == NULL)
+                {
                     perror("Memory allocation failed");
                     free(extension);
                     return EXIT_FAILURE;
@@ -189,7 +192,9 @@ int main(int argc, char *argv[])
 
                 free(plaintext);
             }
-        } else {
+        }
+        else
+        {
             LOG("Extracted data size: %u bytes\n", stego->size);
             LOG("Extracted data %.*s\n", (int)stego->size, stego->data);
             LOG("Extracted data extension: %s\n", extension);

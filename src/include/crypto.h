@@ -13,7 +13,7 @@ typedef enum {
 
 /**
  * @brief Encrypts the given plaintext using the specified pass.
- * 
+ *
  * @param plaintext The plaintext to encrypt.
  * @param len The length of the plaintext.
  * @param pass The encryption pass.
@@ -25,7 +25,7 @@ typedef size_t (*Encrypt)(const uint8_t *plaintext, const size_t len, const uint
 
 /**
  * @brief Decrypts the given ciphertext using the specified pass.
- * 
+ *
  * @param ciphertext The ciphertext to decrypt.
  * @param len The length of the ciphertext.
  * @param pass The decryption pass.

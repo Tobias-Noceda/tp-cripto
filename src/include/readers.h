@@ -24,7 +24,7 @@ size_t get_output(FILE **file, const char *output, const char *input);
  * 
  * @note The caller is responsible for freeing the allocated memory. NOTHING but the memory pointer should be freed.
  * @note Data pointers will reference the allocated memory block.
- * 
+ *
  * @param input The input file
  * @param memory Pointer to consecutive allocated memory
  * @return Data The message data

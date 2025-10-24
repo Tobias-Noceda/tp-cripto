@@ -11,7 +11,7 @@ Data get_message(const char *input, uint8_t **memory, uint32_t *length)
     Data input_data = {
         .size = NULL,
         .data = NULL,
-        .ext = NULL
+        .ext = NULL,
     };
 
     FILE *file = fopen(input, "rb");
@@ -55,7 +55,6 @@ Data get_message(const char *input, uint8_t **memory, uint32_t *length)
     input_data.data = (char *)(*memory + sizeof(uint32_t));
     input_data.ext = (char *)(*memory + sizeof(uint32_t) + file_size);
 
-    
     size_t read_size = fread(input_data.data, 1, file_size, file);
     if (read_size != file_size)
     {
@@ -64,10 +63,10 @@ Data get_message(const char *input, uint8_t **memory, uint32_t *length)
         fclose(file);
         return (Data){};
     }
-    
+
     fclose(file);
     *input_data.size = (uint32_t)file_size;
-    
+
     memcpy(input_data.ext, dot, strlen(dot) + 1); // Copy extension with null terminator
 
     LOG("Input file size: %u bytes\n", *input_data.size);
