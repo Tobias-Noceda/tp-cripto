@@ -44,7 +44,8 @@ int main(int argc, char *argv[])
 
         uint8_t *memory;
         size_t length;
-        Data input_data = get_message(args.input_path, &memory, &length);
+        get_message(args.input_path, &memory, &length);
+
         if (!memory)
         {
             perror("Failed to get input message");
