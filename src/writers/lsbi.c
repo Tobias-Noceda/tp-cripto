@@ -26,7 +26,7 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
     }
 
     long start_offset = ftell(output);
-    if (start_offset == -1)
+    if (start_offset < 0)
     {
         perror("ftell failed");
         free(pattern_data);
@@ -71,15 +71,19 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
         {
             perror("Error reading output file");
         }
+
         free(pattern_data);
         free(data);
+        
         return 0;
     }
-    if (fseek(output, start_offset, SEEK_SET) != 0)
+    if (fseek(output, start_offset, SEEK_SET))
     {
         perror("fseek failed");
+
         free(pattern_data);
         free(data);
+        
         return 0;
     }
     
@@ -134,6 +138,7 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
             }
         }
     }
+    
     int has_to_invert = 0;
     for(int i = 0; i < PATTERN_SIZE; i++)
     {
@@ -195,5 +200,4 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
     free(data);
 
     return pattern_size + bytes_needed;
-    
 }

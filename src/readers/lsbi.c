@@ -103,14 +103,10 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
             if (feof(file))
             {
                 perror("Not enough bytes to read message");
-
                 free(stego);
-
                 return NULL;
             }
-            index++;
-        } while ((index - 1) % 3 == 1); // skip R
-
+        } while (index++ % 3 == 1); // skip R
 
         uint8_t last3 = LSB((uint8_t)byte, 3);
         int pattern_index = last3 >> 1;
@@ -169,12 +165,13 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
                     if (feof(file))
                     {
                         perror("Error reading file");
+
                         free(*extension);
                         free(stego);
+                        
                         return NULL;
                     }
-                    ext_index++;
-                } while ((ext_index - 1) % 3 == 1); // skip R
+                } while (ext_index++ % 3 == 1); // skip R
 
                 uint8_t last3 = LSB(image_byte, 3);
                 int pattern_index = last3 >> 1;
