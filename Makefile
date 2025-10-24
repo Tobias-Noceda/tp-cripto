@@ -23,8 +23,7 @@ $(EXEC):
 
 check: all
 	@echo "Running tests..."
-	@./test.sh LSB1
-	@./test.sh LSB4
+	@./test.sh
 	@echo "All tests done!"
 
 clean:
