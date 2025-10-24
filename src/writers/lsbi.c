@@ -1,9 +1,11 @@
 #include <writers.h>
 #include <logs.h>
-#include <math.h>
+#include <stdbool.h>
 
 #define PATTERN_SIZE 4
 #define LSB(x, n) ((x) & ((1 << (n)) - 1))
+#define GET_BYTES_NEEDED(x) (((x) * 3 + 1) / 2)
+
 
 size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
 {
@@ -51,7 +53,7 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
     size *= 8;
 
     size_t bits_needed = size;
-    size_t bytes_needed = (3 * bits_needed + 1) / 2;
+    size_t bytes_needed = GET_BYTES_NEEDED(bits_needed);
 
     uint8_t *data = malloc(bytes_needed);
     if (data == NULL)
@@ -124,7 +126,12 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
             uint8_t last3 = LSB(value, 3);
             int pattern_index = last3 >> 1;
             //LOG("Pattern of bit: %d\n", pattern_index);
-            (bit == (last3 & 1)) ? pattern[pattern_index]-- : pattern[pattern_index]++;
+            if (bit == (last3 & 1))
+            {
+                pattern[pattern_index]--;
+            } else {
+                pattern[pattern_index]++;
+            }
             
             data[curr_byte] = (data[curr_byte] & 0xFE) | bit;
             curr_byte++;
@@ -138,22 +145,22 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
             }
         }
     }
-    
-    int has_to_invert = 0;
+
+    bool has_to_invert = false;
     for(int i = 0; i < PATTERN_SIZE; i++)
     {
         if(pattern[i] > 0)
         {
-            has_to_invert++;
+            has_to_invert = true;
             pattern[i] = 1;
         } else {
             pattern[i] = 0;
         }
     }
 
-    LOG("Number of patterns to invert: %d\n", has_to_invert);
+    LOG("Invertion needed: %s\n", has_to_invert ? "true" : "false");
     
-    if(has_to_invert > 0)
+    if(has_to_invert)
     {
         curr_byte = 0;
         while (curr_byte < bytes_needed)

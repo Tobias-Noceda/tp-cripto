@@ -11,6 +11,7 @@
 #define PATTERN_SIZE 4
 #define EXTENSION_BLOCK_LENGTH 8
 #define LSB(x, n) ((x) & ((1 << (n)) - 1))
+#define GET_BYTES_NEEDED(x) (((x) * 3 + 1) / 2)
 
 
 Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
@@ -44,15 +45,10 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
     */
 
     size_t bits_needed = sizeof(uint32_t) * 8;
-    size_t bytes_count = (bits_needed * 3 + 1) / 2;
-    uint8_t *length_bytes = malloc(bytes_count);
-    if (length_bytes == NULL)
-    {
-        perror("Memory allocation for length failed");
-        return NULL;
-    }
+    size_t bytes_needed = GET_BYTES_NEEDED(bits_needed);
+    uint8_t length_bytes[bytes_needed];
 
-    if (fread(length_bytes, sizeof(uint8_t), bytes_count, file) != bytes_count)
+    if (fread(length_bytes, sizeof(uint8_t), bytes_needed, file) != bytes_needed)
     {
         perror("Not enough bytes to read length");
         return NULL;
@@ -60,7 +56,7 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
 
     uint32_t message_length = 0;
     size_t bits_read = 0;
-    for (int i = 0 ; i < bytes_count && bits_read < bits_needed ; i++)
+    for (int i = 0 ; i < bytes_needed && bits_read < bits_needed ; i++)
     {
         if (i % 3 != 1) // not R
         {
@@ -74,7 +70,6 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
             bits_read++;
         }
     }
-    free(length_bytes);
 
     if (bits_read < bits_needed)
     {
@@ -126,14 +121,6 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
         int length = 0;
         uint8_t ext_byte = 0;
         int ext_index = 0;
-
-        *extension = malloc(EXTENSION_BLOCK_LENGTH);
-        if (!*extension)
-        {
-            perror("Memory allocation for extension failed");
-            free(stego);
-            return NULL;
-        }
 
         do
         {
