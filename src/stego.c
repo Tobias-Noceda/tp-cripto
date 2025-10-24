@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
         fseek(porter, header_size, SEEK_SET); // Skip BMP header
 
         uint8_t *memory;
-        uint32_t length;
+        size_t length;
         Data input_data = get_message(args.input_path, &memory, &length);
         if (!memory)
         {

@@ -7,7 +7,7 @@
 #include <stego.h>
 #include <logs.h>
 
-Data get_message(const char *input, uint8_t **memory, uint32_t *length)
+Data get_message(const char *input, uint8_t **memory, size_t *length)
 {
     FILE *file = fopen(input, "rb");
     if (file == NULL)

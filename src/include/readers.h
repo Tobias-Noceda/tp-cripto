@@ -31,7 +31,7 @@ size_t get_output(FILE **file, const char *output, const char *input);
  * @param length Pointer to store the length of the data
  * @return Data The message data
  */
-Data get_message(const char *input, uint8_t **memory, uint32_t *length);
+Data get_message(const char *input, uint8_t **memory, size_t *length);
 
 /**
  * @brief Retrieve a steganographed message using LSB1 method
