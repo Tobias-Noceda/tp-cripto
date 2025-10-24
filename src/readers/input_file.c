@@ -43,10 +43,7 @@ Data get_message(const char *input, uint8_t **memory, uint32_t *length)
     if (*memory == NULL)
     {
         perror("Memory allocation failed");
-
-        *memory = NULL;
         fclose(file);
-
         return (Data){};
     }
 
