@@ -6,7 +6,7 @@
 
 typedef struct {
     uint32_t size;
-    // big endian (network byte order) pointer to data size, preserved for legacy reasons
+    // Big endian (network byte order) pointer to data size, preserved for legacy reasons
     uint32_t *sizep;
     char *data;
     char *ext;

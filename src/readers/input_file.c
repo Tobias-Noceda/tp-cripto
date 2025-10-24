@@ -54,8 +54,7 @@ Data get_message(const char *input, uint8_t **memory, uint32_t *length)
         .ext = (char *)(*memory + sizeof(uint32_t) + file_size),
     };
 
-    uint32_t endian_size = htonl(input_data.size);
-    memcpy(input_data.sizep, &endian_size, sizeof(uint32_t));
+    *input_data.sizep = htonl(input_data.size);
 
     size_t read_size = fread(input_data.data, 1, file_size, file);
     if (read_size != file_size)
