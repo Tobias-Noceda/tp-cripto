@@ -130,10 +130,7 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
                 if (tmp == NULL)
                 {
                     perror("Memory allocation for extension failed");
-
-                    free(*extension);
                     free(stego);
-
                     return NULL;
                 }
 
@@ -152,10 +149,7 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
                     if (feof(file))
                     {
                         perror("Error reading file");
-
-                        free(*extension);
                         free(stego);
-                        
                         return NULL;
                     }
                 } while (ext_index++ % 3 == 1); // skip R

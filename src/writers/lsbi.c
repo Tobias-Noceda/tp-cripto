@@ -18,9 +18,8 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
     Differences will be ++, matches --.
     */
     int pattern[PATTERN_SIZE] = {0};
-    size_t pattern_size = PATTERN_SIZE;
 
-    uint8_t *pattern_data = malloc(pattern_size);
+    uint8_t *pattern_data = malloc(PATTERN_SIZE);
     if (pattern_data == NULL)
     {
         perror("Memory allocation failed");
@@ -35,7 +34,7 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
         return 0;
     }
     
-    if (fread(pattern_data, sizeof(uint8_t), pattern_size, output) != pattern_size)
+    if (fread(pattern_data, sizeof(uint8_t), PATTERN_SIZE, output) != PATTERN_SIZE)
     {
         if (feof(output))
         {
@@ -107,18 +106,22 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
                 curr_byte++;
                 if (curr_byte >= bytes_needed)
                 {
-                    fprintf(stderr, "Error: Overflow while skipping R\n");
+                    perror( "Error: Overflow while skipping R\n");
+
                     free(pattern_data);
                     free(data);
+
                     return 0;
                 }
             }
 
             if (curr_byte >= bytes_needed)
             {
-                fprintf(stderr, "Error: Overflow before accessing data\n");
+                perror("Error: Overflow before accessing data\n");
+
                 free(pattern_data);
                 free(data);
+
                 return 0;
            }
 
@@ -138,9 +141,11 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
             curr_byte_input++;
             if (curr_byte >= bytes_needed)
             {
-                fprintf(stderr, "Error: Overflow during embedding\n");
+                perror("Error: Overflow during embedding\n");
+
                 free(pattern_data);
                 free(data);
+                
                 return 0;
             }
         }
@@ -183,13 +188,15 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
         pattern_data[i] = (pattern_data[i] & 0xFE) | pattern[i];
     }
 
-    size_t written = fwrite(pattern_data, sizeof(uint8_t), pattern_size, output);
+    size_t written = fwrite(pattern_data, sizeof(uint8_t), PATTERN_SIZE, output);
 
-    if (written != pattern_size)
+    if (written != PATTERN_SIZE)
     {
         perror("Error writing to output file");
+
         free(pattern_data);
         free(data);
+        
         return 0;
     }
 
@@ -198,13 +205,15 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
     if (written != bytes_needed)
     {
         perror("Error writing to output file");
+
         free(pattern_data);
         free(data);
+        
         return 0;
     }
 
     free(pattern_data);
     free(data);
 
-    return pattern_size + bytes_needed;
+    return PATTERN_SIZE + bytes_needed;
 }
