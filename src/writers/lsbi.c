@@ -49,10 +49,9 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
         return 0;
     }
 
-    size *= 8;
-
-    size_t bits_needed = size;
+    size_t bits_needed = size * 8;
     size_t bytes_needed = GET_BYTES_NEEDED(bits_needed);
+    LOG("Bytes needed for embedding: %zu\n", bytes_needed);
 
     uint8_t *data = malloc(bytes_needed);
     if (data == NULL)
@@ -139,7 +138,7 @@ size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size)
             data[curr_byte] = (data[curr_byte] & 0xFE) | bit;
             curr_byte++;
             curr_byte_input++;
-            if (curr_byte >= bytes_needed)
+            if (curr_byte > bytes_needed)
             {
                 perror("Error: Overflow during embedding\n");
 
