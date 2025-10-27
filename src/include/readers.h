@@ -21,15 +21,17 @@ size_t get_output(FILE **file, const char *output, const char *input);
 
 /**
  * @brief Get the message data
- * 
+ *
  * @note The caller is responsible for freeing the allocated memory. NOTHING but the memory pointer should be freed.
  * @note Data pointers will reference the allocated memory block.
+ * @note Success or failure can be determined by checking memory being NULL or not.
  *
  * @param input The input file
  * @param memory Pointer to consecutive allocated memory
+ * @param length Pointer to store the length of the data
  * @return Data The message data
  */
-Data get_message(const char *input, uint8_t **memory, uint32_t *length);
+Data get_message(const char *input, uint8_t **memory, size_t *length);
 
 /**
  * @brief Retrieve a steganographed message using LSB1 method
@@ -50,3 +52,13 @@ Stego *retrieve_lsb1(FILE *file, size_t offset, char **extension);
  * @return char* The retrieved message
  */
 Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension);
+
+/**
+ * @brief Retrieve a steganographed message using LSBI method
+ *
+ * @param file The file pointer to read from
+ * @param offset The offset to start reading from
+ * @param extension Pointer to store the file extension
+ * @return Stego* The retrieved message
+ */
+Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension);

@@ -2,7 +2,7 @@
 
 fails=0
 
-for stego in LSB1 LSB4 #LSBI
+for stego in LSB1 LSB4 LSBI
 do
     ./test-embed.sh $stego || ((fails++))
     ./test-extract.sh $stego || ((fails++))

@@ -12,11 +12,11 @@
 #include <bmp.h>
 #include <crypto.h>
 
+#include <arpa/inet.h>
+
 int main(int argc, char *argv[])
 {
     Arguments args = get_args(argc, argv);
-    uint8_t *ciphertext = NULL;
-    size_t ciphertext_len = 0;
 
     if (args.embed)
     {
@@ -34,89 +34,36 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        uint8_t *memory;
-        uint32_t length;
-        Data input_data = get_message(args.input_path, &memory, &length);
-
-        if (input_data.data == NULL)
-        {
-            fclose(porter);
-            return EXIT_FAILURE;
-        }
-        if (input_data.ext == NULL)
-        {
-            perror("File extension couldn't be determined");
-            free(memory);
-            fclose(porter);
-            return EXIT_FAILURE;
-        }
-        if (*input_data.size == 0)
-        {
-            perror("Input file cannot be empty.");
-
-            free(memory);
-            fclose(porter);
-
-            return EXIT_FAILURE;
-        }
-
         const BITMAPFILEHEADER header = get_bmp_file_header(porter);
         if (header.signature != 0x4D42)
         {
             fprintf(stderr, "Porter file is not a valid BMP file.\n");
-
-            free(memory);
             fclose(porter);
-
             return EXIT_FAILURE;
         }
 
         uint32_t header_size = header.offset;
         fseek(porter, header_size, SEEK_SET); // Skip BMP header
 
-        uint32_t msg_len;
-        uint8_t *msg_ptr;
+        uint8_t *memory;
+        size_t length;
+        get_message(args.input_path, &memory, &length);
+        if (!memory)
+        {
+            perror("Failed to get input message");
+            fclose(porter);
+            return EXIT_FAILURE;
+        }
 
         if (args.ssl)
         {
-            ciphertext_len = args.algorithm.encrypt(memory, length, (uint8_t *)args.password, args.mode.val, &ciphertext);
-
-            msg_len = ciphertext_len;
-            msg_ptr = ciphertext;
-
-            LOG("Encrypted data size: %u bytes\n", msg_len);
-            LOG("Encrypted data (first 16 bytes): ");
-            for (size_t i = 0; i < (msg_len < 16 ? msg_len : 16); i++)
-            {
-                LOG("%02x", msg_ptr[i]);
-            }
-            LOG("\n");
-            length = msg_len;
-        }
-        else
-        {
-            length -= sizeof(uint32_t);
-            msg_len = *input_data.size;
-            msg_ptr = memory + sizeof(uint32_t);
-        }
-
-        // turn the size into 4 bytes
-        uint8_t size_bytes[sizeof(uint32_t)];
-        size_bytes[0] = (msg_len >> 24) & 0xFF;
-        size_bytes[1] = (msg_len >> 16) & 0xFF;
-        size_bytes[2] = (msg_len >> 8) & 0xFF;
-        size_bytes[3] = msg_len & 0xFF;
-
-        if (!args.stego.embed(porter, size_bytes, sizeof(uint32_t)))
-        {
-            fprintf(stderr, "Failed to embed size data.\n");
-
+            uint8_t *ciphertext;
+            length = args.algorithm.encrypt(memory, length, (uint8_t *)args.password, args.mode.val, &ciphertext);
             free(memory);
-            fclose(porter);
-
-            return EXIT_FAILURE;
+            memory = ciphertext;
         }
-        if (!args.stego.embed(porter, msg_ptr, length))
+
+        if (!args.stego.embed(porter, memory, length))
         {
             fprintf(stderr, "Failed to embed data.\n");
 
@@ -130,7 +77,6 @@ int main(int argc, char *argv[])
 
         // free memory and close files
         free(memory);
-        free(ciphertext);
         fclose(porter);
     }
     else
@@ -169,12 +115,13 @@ int main(int argc, char *argv[])
             if (plaintext != NULL)
             {
                 Data decrypted_data = {
-                    .size = (uint32_t *)plaintext,
+                    .size = ntohl(*(uint32_t *)plaintext),
+                    .sizep = (uint32_t *)plaintext,
                     .data = (char *)(plaintext + sizeof(uint32_t)),
                     .ext = (char *)(plaintext + sizeof(uint32_t) + *(uint32_t *)plaintext)};
 
-                LOG("Decrypted data size: %u bytes\n", *decrypted_data.size);
-                LOG("Decrypted data content: %.*s\n", (int)*decrypted_data.size, decrypted_data.data);
+                LOG("Decrypted data size: %u bytes\n", decrypted_data.size);
+                LOG("Decrypted data content: %.*s\n", decrypted_data.size, decrypted_data.data);
                 LOG("Decrypted data extension: %s\n", decrypted_data.ext);
 
                 free(stego);

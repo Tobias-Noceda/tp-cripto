@@ -5,7 +5,9 @@
 #include <stdio.h>
 
 typedef struct {
-    uint32_t *size;
+    uint32_t size;
+    // Big endian (network byte order) pointer to data size, preserved for legacy reasons
+    uint32_t *sizep;
     char *data;
     char *ext;
 } Data;
