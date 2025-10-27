@@ -13,7 +13,8 @@
 #include <bmp.h>
 #include <crypto.h>
 
-typedef struct {
+typedef struct
+{
     uint32_t size;
     uint8_t data[];
 } Encrypted;
@@ -65,7 +66,8 @@ int main(int argc, char *argv[])
             length = args.algorithm.encrypt(memory, length, (uint8_t *)args.password, args.mode.val, &ciphertext);
 
             Encrypted *tmp = realloc(memory, sizeof(Encrypted) + length);
-            if (!tmp) {
+            if (!tmp)
+            {
                 perror("Failed to get input message");
 
                 free(memory);
@@ -74,10 +76,12 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
 
-            memcpy(&tmp->size, &length, sizeof(uint32_t));
+            tmp->size = htonl(length);
             memcpy(tmp->data, ciphertext, length);
 
-            memory = (uint8_t *) tmp;
+            LOG("Encryption size: %zu\n", length);
+
+            memory = (uint8_t *)tmp;
 
             free(ciphertext);
         }
@@ -126,52 +130,34 @@ int main(int argc, char *argv[])
         Stego *stego = args.stego.retrieve(porter, header_size, args.ssl ? NULL : &extension);
         fclose(porter);
 
-        if (args.ssl)
-        {
-            uint8_t *plaintext = NULL;
-            args.algorithm.decrypt(stego->data, stego->size, (uint8_t *)args.password, args.mode.val, &plaintext);
-
-            if (plaintext != NULL)
-            {
-                Data decrypted_data = {
-                    .size = *(uint32_t *)plaintext,
-                    .sizep = (uint32_t *)plaintext,
-                    .data = (char *)(plaintext + sizeof(uint32_t)),
-                    .ext = (char *)(plaintext + sizeof(uint32_t) + *(uint32_t *)plaintext)};
-
-                LOG("Decrypted data size: %u bytes\n", decrypted_data.size);
-                LOG("Decrypted data content: %.*s\n", decrypted_data.size, decrypted_data.data);
-                LOG("Decrypted data extension: %s\n", decrypted_data.ext);
-
-                free(stego);
-                stego = malloc(sizeof(Stego) + decrypted_data.size);
-                if (stego == NULL)
-                {
-                    perror("Memory allocation failed");
-                    free(extension);
-                    return EXIT_FAILURE;
-                }
-
-                stego->size = decrypted_data.size;
-                memcpy(stego->data, decrypted_data.data, decrypted_data.size);
-                extension = strdup(decrypted_data.ext);
-
-                free(plaintext);
-            }
-        }
-        else
-        {
-            LOG("Extracted data size: %u bytes\n", stego->size);
-            LOG("Extracted data %.*s\n", (int)stego->size, stego->data);
-            LOG("Extracted data extension: %s\n", extension);
-        }
-
         if (stego == NULL)
         {
             fprintf(stderr, "Failed to retrieve stego data.\n");
             free(extension);
             return EXIT_FAILURE;
         }
+
+        if (args.ssl)
+        {
+            uint8_t *plaintext = NULL;
+            size_t extracted = args.algorithm.decrypt(stego->data, stego->size, (uint8_t *)args.password, args.mode.val, &plaintext);
+            free(stego);
+
+            if (!plaintext)
+            {
+                perror("Failed to decrypt");
+                return EXIT_FAILURE;
+            }
+
+            stego = (Stego *)plaintext;
+            extension = strdup((char *)(plaintext + sizeof(uint32_t) + *(uint32_t *)plaintext));
+
+            LOG("Decrypted length: %zu bytes\n", extracted);
+        }
+
+        LOG("Extracted data size: %u bytes\n", stego->size);
+        LOG("Extracted data %.*s\n", (int)stego->size, stego->data);
+        LOG("Extracted data extension: %s\n", extension);
 
         char *full_output_file_name;
         if (extension != NULL)
