@@ -1,5 +1,6 @@
 #include "args.h"
 
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -12,7 +13,10 @@
 #include <bmp.h>
 #include <crypto.h>
 
-#include <arpa/inet.h>
+typedef struct {
+    uint32_t size;
+    uint8_t data[];
+} Encrypted;
 
 int main(int argc, char *argv[])
 {
@@ -59,8 +63,23 @@ int main(int argc, char *argv[])
         {
             uint8_t *ciphertext;
             length = args.algorithm.encrypt(memory, length, (uint8_t *)args.password, args.mode.val, &ciphertext);
-            free(memory);
-            memory = ciphertext;
+
+            Encrypted *tmp = realloc(memory, sizeof(Encrypted) + length);
+            if (!tmp) {
+                perror("Failed to get input message");
+
+                free(memory);
+                fclose(porter);
+
+                return EXIT_FAILURE;
+            }
+
+            memcpy(&tmp->size, &length, sizeof(uint32_t));
+            memcpy(tmp->data, ciphertext, length);
+
+            memory = (uint8_t *) tmp;
+
+            free(ciphertext);
         }
 
         if (!args.stego.embed(porter, memory, length))
@@ -115,7 +134,7 @@ int main(int argc, char *argv[])
             if (plaintext != NULL)
             {
                 Data decrypted_data = {
-                    .size = ntohl(*(uint32_t *)plaintext),
+                    .size = *(uint32_t *)plaintext,
                     .sizep = (uint32_t *)plaintext,
                     .data = (char *)(plaintext + sizeof(uint32_t)),
                     .ext = (char *)(plaintext + sizeof(uint32_t) + *(uint32_t *)plaintext)};
@@ -125,7 +144,7 @@ int main(int argc, char *argv[])
                 LOG("Decrypted data extension: %s\n", decrypted_data.ext);
 
                 free(stego);
-                stego = malloc(sizeof(Stego) + *decrypted_data.size);
+                stego = malloc(sizeof(Stego) + decrypted_data.size);
                 if (stego == NULL)
                 {
                     perror("Memory allocation failed");
@@ -133,8 +152,8 @@ int main(int argc, char *argv[])
                     return EXIT_FAILURE;
                 }
 
-                stego->size = *decrypted_data.size;
-                memcpy(stego->data, decrypted_data.data, *decrypted_data.size);
+                stego->size = decrypted_data.size;
+                memcpy(stego->data, decrypted_data.data, decrypted_data.size);
                 extension = strdup(decrypted_data.ext);
 
                 free(plaintext);

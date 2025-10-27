@@ -39,7 +39,8 @@ static size_t ssl(const uint8_t *in, const size_t len, const uint8_t *pass, cons
 {
     uint8_t key[EVP_MAX_KEY_LENGTH];
     uint8_t iv[EVP_MAX_IV_LENGTH];
-    if (!EVP_BytesToKey(cipher, EVP_md5(), NULL, pass, strlen((char *)pass), 1, key, iv))
+    // Or PKCS5_PBKDF2_HMAC, pick your poison
+    if (!EVP_BytesToKey(cipher, EVP_sha256(), NULL, pass, strlen((char *)pass), 10000, key, iv))
         return OPENSSL_ERR(NULL);
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
