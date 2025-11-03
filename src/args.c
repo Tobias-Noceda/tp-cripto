@@ -83,13 +83,13 @@ static struct argp_option options[] = {
         .doc = "Output file (with .bmp extension when embedding, without extension when extracting)",
     },
     {
-        .name = "algorithm",
+        .name = "a",
         .key = ARGK_ALGORITHM,
         .arg = "ALGORITHM",
         .doc = "Select encryption/decryption algorithm (aes128, aes192, aes256, 3des)",
     },
     {
-        .name = "mode",
+        .name = "m",
         .key = ARGK_MODE,
         .arg = "MODE",
         .doc = "Select cipher mode for encryption/decryption (ECB, CFB, OFB, CBC)",

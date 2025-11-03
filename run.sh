@@ -17,7 +17,7 @@ fi
 
 ssl=""
 if [ -n "$algo" ] && [ -n "$mode" ] && [ -n "$pass" ]; then
-    ssl="-alg $algo -mode $mode -pass $pass"
+    ssl="-a $algo -m $mode -pass $pass"
 fi
 
 echo =========================================================
