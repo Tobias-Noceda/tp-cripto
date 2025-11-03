@@ -77,11 +77,14 @@ int main(int argc, char *argv[])
             }
 
             tmp->size = htonl(length);
+
             memcpy(tmp->data, ciphertext, length);
 
             LOG("Encryption size: %zu\n", length);
 
             memory = (uint8_t *)tmp;
+
+            length += sizeof(Encrypted);
 
             free(ciphertext);
         }

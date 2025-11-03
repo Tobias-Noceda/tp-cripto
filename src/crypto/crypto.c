@@ -38,18 +38,17 @@ static inline int CUSTOM_ERR(EVP_CIPHER_CTX *ctx, char *msg)
 static size_t ssl(const uint8_t *in, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **out, bool encrypt)
 {
     int key_len = EVP_CIPHER_get_key_length(cipher);
-    int iv_len = EVP_CIPHER_get_iv_length(cipher);
-    
-    uint8_t keyiv[EVP_MAX_KEY_LENGTH + EVP_MAX_IV_LENGTH];
+
+    uint8_t keyiv[key_len];
     // Or EVP_BytesToKey, pick your poison
-    if (!PKCS5_PBKDF2_HMAC((const char *)pass, strlen((char *)pass), NULL, 0, 10000, EVP_sha256(), key_len + iv_len, keyiv))
+    if (!PKCS5_PBKDF2_HMAC((const char *)pass, strlen((char *)pass), NULL, 0, 10000, EVP_sha256(), key_len, keyiv))
         return OPENSSL_ERR(NULL);
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
         return OPENSSL_ERR(NULL);
 
-    if (!EVP_CipherInit_ex2(ctx, cipher, keyiv, keyiv + key_len, encrypt ? 1 : 0, NULL))
+    if (!EVP_CipherInit_ex2(ctx, cipher, keyiv, keyiv + key_len / 2, encrypt ? 1 : 0, NULL))
         return OPENSSL_ERR(ctx);
 
     *out = malloc(len + EVP_CIPHER_get_block_size(cipher));
