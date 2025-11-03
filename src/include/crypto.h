@@ -5,10 +5,10 @@
 #include <stdint.h>
 
 typedef enum {
-    ECB = 0,
+    CBC = 0,
+    ECB,
     CFB,
-    OFB,
-    CBC
+    OFB
 } CIPHER_MODES;
 
 /**
