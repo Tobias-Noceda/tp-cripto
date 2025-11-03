@@ -7,6 +7,8 @@
 #include <readers.h>
 #include <writers.h>
 
+#define DEFAULT 0
+
 /**
  * @brief argp option parser
  *
@@ -143,10 +145,10 @@ static CipherAlgorithms get_cipher_algorithms(const char *name)
 }
 
 static const CipherMode cipher_modes[] = {
+    {"cbc", CBC},
     {"ecb", ECB},
     {"cfb", CFB},
     {"ofb", OFB},
-    {"cbc", CBC},
     {0},
 };
 
@@ -202,7 +204,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         arguments->ssl = true;
         arguments->mode = get_cipher_mode(arg);
         if (!arguments->mode.name)
-            argp_error(state, "Invalid cipher mode. Available modes: ECB, CFB, OFB, CBC.");
+            argp_error(state, "Invalid cipher mode. Available modes: CBC, ECB, CFB, OFB.");
         break;
 
     case ARGK_PASSWORD:
@@ -241,14 +243,15 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         // If ssl is enabled, all three must be defined
         if (arguments->ssl)
         {
-            if (!arguments->algorithm.name)
-                argp_error(state, "-algorithm is required when using encryption.");
-
-            if (!arguments->mode.name)
-                argp_error(state, "-mode is required when using encryption.");
-
             if (!arguments->password)
                 argp_error(state, "-password is required when using encryption.");
+
+            if (!arguments->algorithm.name)
+                arguments->algorithm = cipher_algorithms[DEFAULT];
+
+            if (!arguments->mode.name)
+                arguments->mode = cipher_modes[DEFAULT];
+
         }
 
         break;
