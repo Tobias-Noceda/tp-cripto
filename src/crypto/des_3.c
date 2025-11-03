@@ -3,10 +3,10 @@
 const EVP_CIPHER *get_des_3_cipher(const CIPHER_MODES mode)
 {
     const EVP_CIPHER *chiphers[] = {
-        EVP_des_ede3_ecb(),
-        EVP_des_ede3_cfb(),
-        EVP_des_ede3_ofb(),
         EVP_des_ede3_cbc(),
+        EVP_des_ede3_ecb(),
+        EVP_des_ede3_cfb8(),
+        EVP_des_ede3_ofb(),        
     };
 
     return chiphers[mode];

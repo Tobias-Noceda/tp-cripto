@@ -3,10 +3,10 @@
 const EVP_CIPHER *get_aes_128_cipher(const CIPHER_MODES mode)
 {
     const EVP_CIPHER *chiphers[] = {
-        EVP_aes_128_ecb(),
-        EVP_aes_128_cfb(),
-        EVP_aes_128_ofb(),
         EVP_aes_128_cbc(),
+        EVP_aes_128_ecb(),
+        EVP_aes_128_cfb8(),
+        EVP_aes_128_ofb(),
     };
 
     return chiphers[mode];
