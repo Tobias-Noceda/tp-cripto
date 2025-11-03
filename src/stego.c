@@ -150,7 +150,8 @@ int main(int argc, char *argv[])
             }
 
             stego = (Stego *)plaintext;
-            extension = strdup((char *)(plaintext + sizeof(uint32_t) + *(uint32_t *)plaintext));
+            stego->size = ntohl(stego->size);
+            extension = strdup((char *)(plaintext + sizeof(uint32_t) + stego->size));
 
             LOG("Decrypted length: %zu bytes\n", extracted);
         }
