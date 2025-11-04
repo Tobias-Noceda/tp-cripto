@@ -41,4 +41,15 @@ size_t embed_data_lsb4(FILE *output, const uint8_t *input, size_t size);
  */
 size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size);
 
+/**
+ * @brief Save the data to the specified output file.
+ *
+ * @param path The base path for the output file
+ * @param extension The extension to append to the output file (can be NULL)
+ * @param data The data to write to the output file
+ * @param size The size of the data to write
+ * @return char* The full path of the created output file, or NULL on failure, must be freed
+ */
+char *set_output(const char *path, const char *extension, const uint8_t *data, size_t size);
+
 #endif

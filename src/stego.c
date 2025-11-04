@@ -165,56 +165,17 @@ int main(int argc, char *argv[])
         LOG("Extracted data %.*s\n", (int)stego->size, stego->data);
         LOG("Extracted data extension: %s\n", extension);
 
-        char *full_output_file_name;
-        if (extension != NULL)
-        {
-            full_output_file_name = malloc(strlen(args.output_path) + strlen(extension) + 2);
-            
-            if (full_output_file_name == NULL)
-            {
-                perror("Memory allocation failed");
-
-                free(stego);
-                free(extension);
-
-                return EXIT_FAILURE;
-            }
-
-            sprintf(full_output_file_name, "%s%s", args.output_path, extension);
-            free(extension);
-        }
-        else
-        {
-            full_output_file_name = strdup(args.output_path);
-            if (full_output_file_name == NULL)
-            {
-                perror("Memory allocation failed");
-                free(stego);
-                return EXIT_FAILURE;
-            }
-        }
-
-        FILE *output_file = fopen(full_output_file_name, "wb");
-        free(full_output_file_name);
-
-        if (output_file == NULL)
-        {
-            perror("Failed to open output file");
-            free(stego);
-            return EXIT_FAILURE;
-        }
-
-        size_t written = fwrite(stego->data, 1, stego->size, output_file);
-        fclose(output_file);
+        char *path = set_output(args.output_path, extension, stego->data, stego->size);
         free(stego);
 
-        if (written != stego->size)
+        if (path == NULL)
         {
-            perror("Failed to write all data to output file");
+            perror("Failed to write to output file");
             return EXIT_FAILURE;
         }
 
-        printf("Data extracted successfully to '%s'.\n", full_output_file_name);
+        printf("Data extracted successfully to '%s'.\n", path);
+        free(path);
     }
 
     return EXIT_SUCCESS;
