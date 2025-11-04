@@ -143,7 +143,9 @@ int main(int argc, char *argv[])
         if (args.ssl)
         {
             uint8_t *plaintext = NULL;
-            size_t extracted = args.algorithm.decrypt(stego->data, stego->size, args.password, args.mode.val, &plaintext);
+            // Don't raise -Wunused-variable on production builds
+            DV(size_t, debug_extracted, args.algorithm.decrypt(stego->data, stego->size, args.password, args.mode.val, &plaintext));
+
             free(stego);
 
             if (!plaintext)
@@ -158,7 +160,7 @@ int main(int argc, char *argv[])
 
             extension = strdup((char *)(plaintext + sizeof(uint32_t) + stego->size));
 
-            LOG("Decrypted length: %zu bytes\n", extracted);
+            LOG("Decrypted length: %zu bytes\n", debug_extracted);
         }
 
         LOG("Extracted data size: %u bytes\n", stego->size);
