@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
             LOG("Encryption size: %zu\n", length);
 
             memory = (uint8_t *)tmp;
-
             length += sizeof(Encrypted);
 
             free(ciphertext);
@@ -99,11 +98,10 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        printf("Data embedded successfully into '%s'.\n", args.output_path);
-
-        // free memory and close files
         free(memory);
         fclose(porter);
+
+        printf("Data embedded successfully into '%s'.\n", args.output_path);
     }
     else
     {
@@ -171,14 +169,19 @@ int main(int argc, char *argv[])
         if (extension != NULL)
         {
             full_output_file_name = malloc(strlen(args.output_path) + strlen(extension) + 2);
+            
             if (full_output_file_name == NULL)
             {
                 perror("Memory allocation failed");
+
                 free(stego);
                 free(extension);
+
                 return EXIT_FAILURE;
             }
+
             sprintf(full_output_file_name, "%s%s", args.output_path, extension);
+            free(extension);
         }
         else
         {
@@ -192,32 +195,26 @@ int main(int argc, char *argv[])
         }
 
         FILE *output_file = fopen(full_output_file_name, "wb");
+        free(full_output_file_name);
+
         if (output_file == NULL)
         {
             perror("Failed to open output file");
             free(stego);
-            free(extension);
-            free(full_output_file_name);
             return EXIT_FAILURE;
         }
 
         size_t written = fwrite(stego->data, 1, stego->size, output_file);
+        fclose(output_file);
+        free(stego);
+
         if (written != stego->size)
         {
             perror("Failed to write all data to output file");
-            free(stego);
-            free(extension);
-            free(full_output_file_name);
-            fclose(output_file);
             return EXIT_FAILURE;
         }
 
         printf("Data extracted successfully to '%s'.\n", full_output_file_name);
-
-        free(stego);
-        free(extension);
-        free(full_output_file_name);
-        fclose(output_file);
     }
 
     return EXIT_SUCCESS;
