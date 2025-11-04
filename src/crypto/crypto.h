@@ -18,7 +18,7 @@
  *
  * @return size_t Length of the ciphertext output.
  */
-size_t enc(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **ciphertext);
+size_t enc(const uint8_t *plaintext, const size_t len, const char *pass, const EVP_CIPHER *cipher, uint8_t **ciphertext);
 
 /**
  * @brief Encrypts the given plaintext using the specified cipher and password.
@@ -32,6 +32,6 @@ size_t enc(const uint8_t *plaintext, const size_t len, const uint8_t *pass, cons
  *
  * @return size_t Length of the plaintext output.
  */
-size_t dec(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **plaintext);
+size_t dec(const uint8_t *ciphertext, const size_t len, const char *pass, const EVP_CIPHER *cipher, uint8_t **plaintext);
 
 #endif

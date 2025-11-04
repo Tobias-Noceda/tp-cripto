@@ -40,7 +40,7 @@ static inline int CUSTOM_ERR(EVP_CIPHER_CTX *ctx, char *msg)
  * @param encrypt Boolean flag indicating whether to encrypt (true) or decrypt (false).
  * @return size_t Length of the output data, or 0 on error.
  */
-static size_t ssl(const uint8_t *in, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **out, bool encrypt)
+static size_t ssl(const uint8_t *in, const size_t len, const char *pass, const EVP_CIPHER *cipher, uint8_t **out, bool encrypt)
 {
     int key_len = EVP_CIPHER_key_length(cipher);
     int iv_len = EVP_CIPHER_iv_length(cipher);
@@ -76,12 +76,12 @@ static size_t ssl(const uint8_t *in, const size_t len, const uint8_t *pass, cons
     return output_length + padding_length;
 }
 
-inline size_t enc(const uint8_t *plaintext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **ciphertext)
+inline size_t enc(const uint8_t *plaintext, const size_t len, const char *pass, const EVP_CIPHER *cipher, uint8_t **ciphertext)
 {
     return ssl(plaintext, len, pass, cipher, ciphertext, true);
 }
 
-inline size_t dec(const uint8_t *ciphertext, const size_t len, const uint8_t *pass, const EVP_CIPHER *cipher, uint8_t **plaintext)
+inline size_t dec(const uint8_t *ciphertext, const size_t len, const char *pass, const EVP_CIPHER *cipher, uint8_t **plaintext)
 {
     return ssl(ciphertext, len, pass, cipher, plaintext, false);
 }

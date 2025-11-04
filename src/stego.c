@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         if (args.ssl)
         {
             uint8_t *ciphertext;
-            length = args.algorithm.encrypt(memory, length, (uint8_t *)args.password, args.mode.val, &ciphertext);
+            length = args.algorithm.encrypt(memory, length, args.password, args.mode.val, &ciphertext);
 
             Encrypted *tmp = realloc(memory, sizeof(Encrypted) + length);
             if (!tmp)
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
         if (args.ssl)
         {
             uint8_t *plaintext = NULL;
-            size_t extracted = args.algorithm.decrypt(stego->data, stego->size, (uint8_t *)args.password, args.mode.val, &plaintext);
+            size_t extracted = args.algorithm.decrypt(stego->data, stego->size, args.password, args.mode.val, &plaintext);
             free(stego);
 
             if (!plaintext)
