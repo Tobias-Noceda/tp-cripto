@@ -13,6 +13,8 @@
 #define SALT_LENGTH 8
 #define ITERATIONS 10000
 
+static uint8_t salt[SALT_LENGTH] = {0};
+
 static inline int OPENSSL_ERR(EVP_CIPHER_CTX *ctx)
 {
     ERR_print_errors_fp(stderr);
@@ -44,7 +46,6 @@ static size_t ssl(const uint8_t *in, const size_t len, const uint8_t *pass, cons
     int iv_len = EVP_CIPHER_iv_length(cipher);
 
     uint8_t keyiv[key_len + iv_len];
-    const unsigned char salt[SALT_LENGTH] = {0};
     // Or EVP_BytesToKey, pick your poison
     if (!PKCS5_PBKDF2_HMAC((const char *)pass, strlen((char *)pass), salt, SALT_LENGTH, ITERATIONS, EVP_sha256(), key_len + iv_len , keyiv))
         return OPENSSL_ERR(NULL);
