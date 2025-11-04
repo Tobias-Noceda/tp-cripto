@@ -1,3 +1,6 @@
+#ifndef WRITERS_H
+#define WRITERS_H
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -37,3 +40,5 @@ size_t embed_data_lsb4(FILE *output, const uint8_t *input, size_t size);
  * @return size_t The number of bytes successfully embedded, or 0 on failure
  */
 size_t embed_data_lsbi(FILE *output, const uint8_t *input, size_t size);
+
+#endif

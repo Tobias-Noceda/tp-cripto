@@ -1,3 +1,6 @@
+#ifndef READERS_H
+#define READERS_H
+
 #include <stdio.h>
 
 #include <stego.h>
@@ -62,3 +65,5 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension);
  * @return Stego* The retrieved message
  */
 Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension);
+
+#endif
