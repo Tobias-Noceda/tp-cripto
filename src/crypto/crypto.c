@@ -46,15 +46,17 @@ static size_t ssl(const uint8_t *in, const size_t len, const uint8_t *pass, cons
     int iv_len = EVP_CIPHER_iv_length(cipher);
 
     uint8_t keyiv[key_len + iv_len];
-    // Or EVP_BytesToKey, pick your poison
-    if (!PKCS5_PBKDF2_HMAC((const char *)pass, strlen((char *)pass), salt, SALT_LENGTH, ITERATIONS, EVP_sha256(), key_len + iv_len , keyiv))
+    const uint8_t *key = keyiv;
+    const uint8_t *iv = keyiv + key_len;
+
+    if (!PKCS5_PBKDF2_HMAC((const char *)pass, strlen((char *)pass), salt, SALT_LENGTH, ITERATIONS, EVP_sha256(), key_len + iv_len, keyiv))
         return OPENSSL_ERR(NULL);
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
         return OPENSSL_ERR(NULL);
 
-    if (!EVP_CipherInit_ex2(ctx, cipher, keyiv, keyiv + key_len, encrypt ? 1 : 0, NULL))
+    if (!EVP_CipherInit_ex2(ctx, cipher, key, iv, encrypt ? 1 : 0, NULL))
         return OPENSSL_ERR(ctx);
 
     *out = malloc(len + EVP_CIPHER_get_block_size(cipher));
