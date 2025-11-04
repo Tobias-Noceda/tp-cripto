@@ -251,7 +251,6 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
             if (!arguments->mode.name)
                 arguments->mode = cipher_modes[DEFAULT];
-
         }
 
         break;
