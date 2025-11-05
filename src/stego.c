@@ -141,8 +141,7 @@ int main(int argc, char *argv[])
         if (args.ssl)
         {
             uint8_t *plaintext = NULL;
-            // Don't raise -Wunused-variable on production builds
-            DV(size_t, debug_extracted, args.algorithm.decrypt(stego->data, stego->size, args.password, args.mode.val, &plaintext));
+            const size_t extracted = args.algorithm.decrypt(stego->data, stego->size, args.password, args.mode.val, &plaintext);
 
             free(stego);
 
@@ -156,9 +155,16 @@ int main(int argc, char *argv[])
             stego->size = ntohl(stego->size);
             LOG("Decrypted data size: %u bytes\n", stego->size);
 
+            if (stego->size > extracted - sizeof(uint32_t))
+            {
+                fprintf(stderr, "Decrypted size is larger than extracted data.\n");
+                free(plaintext);
+                return EXIT_FAILURE;
+            }
+
             extension = strdup((char *)(plaintext + sizeof(uint32_t) + stego->size));
 
-            LOG("Decrypted length: %zu bytes\n", debug_extracted);
+            LOG("Decrypted length: %zu bytes\n", extracted);
         }
 
         LOG("Extracted data size: %u bytes\n", stego->size);
