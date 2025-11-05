@@ -31,6 +31,6 @@ check: all
 	@echo "All tests done!"
 
 clean:
-	rm -f $(OBJS) $(EXEC) runs/*
+	rm -rf $(OBJS) $(EXEC) ./bin ./runs/* ./runs
 
 .PHONY: all clean
