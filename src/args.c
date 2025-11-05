@@ -94,7 +94,7 @@ static struct argp_option options[] = {
         .name = "m",
         .key = ARGK_MODE,
         .arg = "MODE",
-        .doc = "Select cipher mode for encryption/decryption (ECB, CFB, OFB, CBC)",
+        .doc = "Select cipher mode for encryption/decryption (CBC, ECB, CFB, OFB)",
     },
     {
         .name = "pass",
