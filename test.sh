@@ -2,10 +2,15 @@
 
 fails=0
 
-for stego in LSB1 LSB4 LSBI
+for args in \
+    "LSB1" \
+    "LSB4" \
+    "LSBI" \
+    "LSBI 3DES CFB" \
+    "LSBI AES256 OFB"
 do
-    ./test-embed.sh $stego || ((fails++))
-    ./test-extract.sh $stego || ((fails++))
+    ./test-embed.sh $args || ((fails++))
+    ./test-extract.sh $args || ((fails++))
 done
 
 if [ $fails -ne 0 ]
