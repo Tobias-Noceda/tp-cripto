@@ -27,6 +27,6 @@ check: all
 	@echo "All tests done!"
 
 clean:
-	rm -f $(OBJS) $(EXEC)
+	rm -f $(OBJS) $(EXEC) runs/*
 
 .PHONY: all clean

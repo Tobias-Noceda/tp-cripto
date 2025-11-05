@@ -5,7 +5,7 @@ stego=$1
 algo=$2
 mode=$3
 
-out="out"
+out="runs/$$"
 
 if [ "$mode" ]
 then
