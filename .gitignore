@@ -4,6 +4,8 @@ obj/
 *.bin
 bin/
 runs/
+*.log
+example*
 
 *.txt
 *.bmp
