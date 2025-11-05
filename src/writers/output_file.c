@@ -15,12 +15,10 @@ char *set_output(const char *path, const char *extension, const uint8_t *data, s
         if (filename == NULL)
         {
             perror("Memory allocation failed");
-            free(extension);
             return NULL;
         }
 
         snprintf(filename, len, "%s%s", path, extension);
-        free(extension);
     }
     else
     {

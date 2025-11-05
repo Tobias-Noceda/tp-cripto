@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
         LOG("Extracted data extension: %s\n", extension);
 
         char *path = set_output(args.output_path, extension, stego->data, stego->size);
+        free(extension);
         free(stego);
 
         if (path == NULL)
