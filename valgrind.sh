@@ -8,12 +8,13 @@ do
         --errors-for-leak-kinds=all \
         --error-exitcode=1 \
         --track-origins=yes \
-        $example &> valgrind_output.log
+        --log-file=valgrind.log \
+        $example &> /dev/null
 
     if [ $? -ne 0 ]
     then
-        echo Memory leak detected
-        echo $example
-        cat valgrind_output.log
+        echo -e "\e[31m==Memory leak detected==\e[0m"
+        cat valgrind.log
+        echo
     fi
 done

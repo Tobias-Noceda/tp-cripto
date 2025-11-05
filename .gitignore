@@ -2,9 +2,9 @@ obj/
 
 *.o
 *.bin
+*.log
 bin/
 runs/
-*.log
 example*
 
 *.txt
