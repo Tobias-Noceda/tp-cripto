@@ -1,5 +1,9 @@
 #include <writers.h>
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 char *set_output(const char *path, const char *extension, const uint8_t *data, size_t size)
 {
     char *filename;
