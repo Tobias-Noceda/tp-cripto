@@ -1,7 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#ifdef DEVELOPMENT
+#if defined(DEVELOPMENT) && defined(VERBOSE)
 #include <stdio.h>
 #define LOG(...) fprintf(stderr, __VA_ARGS__)
 #define DV(type, name, val) type name = (val)

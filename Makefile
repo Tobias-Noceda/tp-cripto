@@ -6,6 +6,10 @@ else
 CFLAGS += -O2
 endif
 
+ifneq ($(LOGS), 0)
+CFLAGS += -DVERBOSE
+endif
+
 ROOT = ./src
 
 SRCS = $(wildcard $(ROOT)/crypto/*.c) $(wildcard $(ROOT)/readers/*.c) $(wildcard $(ROOT)/writers/*.c) $(wildcard $(ROOT)/bmp/*.c) $(wildcard $(ROOT)/*.c)
