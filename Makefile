@@ -17,12 +17,12 @@ HDRS = $(ROOT)/include
 
 OBJS = $(SRCS:.c=.o)
 
-EXEC = bin/stego
+EXEC = ./bin/stego
 
 all: $(EXEC)
 
 $(EXEC):
-	@mkdir -p bin
+	@mkdir -p ./bin
 	$(CC) $(SRCS) $(CFLAGS) -I$(HDRS) -o $@
 
 check: all
