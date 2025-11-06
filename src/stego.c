@@ -139,7 +139,6 @@ int main(int argc, char *argv[])
         {
             uint8_t *plaintext = NULL;
             const size_t extracted = args.algorithm.decrypt(stego->data, stego->size, args.password, args.mode.val, &plaintext);
-
             free(stego);
 
             if (!plaintext)
@@ -155,11 +154,11 @@ int main(int argc, char *argv[])
             if (stego->size > extracted - sizeof(uint32_t))
             {
                 fprintf(stderr, "Decrypted size is larger than extracted data.\n");
-                free(plaintext);
+                free(stego);
                 return EXIT_FAILURE;
             }
 
-            extension = args.no_extension ? NULL : strdup((char *)(plaintext + sizeof(uint32_t) + stego->size));
+            extension = args.no_extension ? NULL : strdup((char *)stego->data + stego->size);
 
             LOG("Decrypted length: %zu bytes\n", extracted);
         }
