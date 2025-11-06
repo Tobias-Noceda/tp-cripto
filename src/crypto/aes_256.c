@@ -7,7 +7,10 @@ static const CipherGetter chiphers[] = {
     EVP_aes_256_ofb,
 };
 
-#define get_aes_256_cipher(mode) chiphers[mode]()
+static inline const EVP_CIPHER *get_aes_256_cipher(const CIPHER_MODES mode)
+{
+    return chiphers[mode]();
+}
 
 size_t aes_256_encrypt(const uint8_t *plaintext, const size_t len, const char *pass, const CIPHER_MODES mode, uint8_t **ciphertext)
 {
