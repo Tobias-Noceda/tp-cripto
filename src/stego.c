@@ -63,9 +63,10 @@ int main(int argc, char *argv[])
         if (args.ssl)
         {
             uint8_t *ciphertext;
-            length = args.algorithm.encrypt(memory, length, args.password, args.mode.val, &ciphertext);
+            size_t encrypted = args.algorithm.encrypt(memory, length, args.password, args.mode.val, &ciphertext);
+            LOG("Encryption size: %zu\n", encrypted);
 
-            Encrypted *tmp = realloc(memory, sizeof(Encrypted) + length);
+            Encrypted *tmp = realloc(memory, sizeof(Encrypted) + encrypted);
             if (!tmp)
             {
                 perror("Failed to get input message");
@@ -76,14 +77,11 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
 
-            tmp->size = htonl(length);
-
-            memcpy(tmp->data, ciphertext, length);
-
-            LOG("Encryption size: %zu\n", length);
+            tmp->size = htonl(encrypted);
+            memcpy(tmp->data, ciphertext, encrypted);
 
             memory = (uint8_t *)tmp;
-            length += sizeof(Encrypted);
+            length = sizeof(Encrypted) + encrypted;
 
             free(ciphertext);
         }
