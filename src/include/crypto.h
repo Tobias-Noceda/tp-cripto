@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-typedef enum {
+typedef enum
+{
     CBC = 0,
     ECB,
     CFB,
