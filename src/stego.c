@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
         }
 
         LOG("Extracted data size: %u bytes\n", stego->size);
-        LOG("Extracted data %.*s\n", (int)stego->size, stego->data);
+        LOG("Extracted data %.*s\n", stego->size, stego->data);
         LOG("Extracted data extension: %s\n", extension);
 
         char *path = set_output(args.output_path, extension, stego->data, stego->size);
