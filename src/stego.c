@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <err.h>
 
 #include <readers.h>
 #include <writers.h>
@@ -35,16 +36,14 @@ int main(int argc, char *argv[])
         long porter_size = get_output(&porter, args.output_path, args.porter_path);
         if (porter_size == 0)
         {
-            perror("Failed to open porter file");
-            return EXIT_FAILURE;
+            err(EXIT_FAILURE, "Failed to open porter file");
         }
 
         const BITMAPFILEHEADER header = get_bmp_file_header(porter);
         if (header.signature != 0x4D42)
         {
-            fprintf(stderr, "Porter file is not a valid BMP file.\n");
             fclose(porter);
-            return EXIT_FAILURE;
+            errx(EXIT_FAILURE, "Porter file is not a valid BMP file");
         }
 
         uint32_t header_size = header.offset;
@@ -54,9 +53,8 @@ int main(int argc, char *argv[])
         size_t length = get_message(args.input_path, &memory);
         if (!length)
         {
-            perror("Failed to get input message");
             fclose(porter);
-            return EXIT_FAILURE;
+            err(EXIT_FAILURE, "Failed to get input message");
         }
 
         if (args.ssl)
@@ -68,12 +66,10 @@ int main(int argc, char *argv[])
             Encrypted *tmp = realloc(memory, sizeof(Encrypted) + encrypted);
             if (!tmp)
             {
-                perror("Failed to get input message");
-
                 free(memory);
                 fclose(porter);
 
-                return EXIT_FAILURE;
+                err(EXIT_FAILURE, "Memory reallocation failed");
             }
 
             tmp->size = htonl(encrypted);
@@ -87,12 +83,9 @@ int main(int argc, char *argv[])
 
         if (!args.stego.embed(porter, memory, length))
         {
-            fprintf(stderr, "Failed to embed data.\n");
-
             free(memory);
             fclose(porter);
-
-            return EXIT_FAILURE;
+            errx(EXIT_FAILURE, "Failed to embed data");
         }
 
         free(memory);
@@ -109,16 +102,14 @@ int main(int argc, char *argv[])
         FILE *porter = fopen(args.porter_path, "rb");
         if (porter == NULL)
         {
-            perror("Error opening porter");
-            return EXIT_FAILURE;
+            err(EXIT_FAILURE, "Error opening porter");
         }
 
         const BITMAPFILEHEADER header = get_bmp_file_header(porter);
         if (header.signature != 0x4D42)
         {
-            fprintf(stderr, "Porter file is not a valid BMP file.\n");
             fclose(porter);
-            return EXIT_FAILURE;
+            errx(EXIT_FAILURE, "Porter file is not a valid BMP file");
         }
 
         const uint32_t header_size = header.offset;
@@ -130,9 +121,8 @@ int main(int argc, char *argv[])
 
         if (stego == NULL)
         {
-            fprintf(stderr, "Failed to retrieve stego data.\n");
             free(extension);
-            return EXIT_FAILURE;
+            errx(EXIT_FAILURE, "Failed to retrieve stego data");
         }
 
         if (args.ssl)
@@ -143,8 +133,7 @@ int main(int argc, char *argv[])
 
             if (!plaintext)
             {
-                perror("Failed to decrypt");
-                return EXIT_FAILURE;
+                err(EXIT_FAILURE, "Failed to decrypt");
             }
 
             stego = (Stego *)plaintext;
@@ -153,9 +142,8 @@ int main(int argc, char *argv[])
 
             if (stego->size > extracted - sizeof(uint32_t))
             {
-                fprintf(stderr, "Decrypted size is larger than extracted data.\n");
                 free(stego);
-                return EXIT_FAILURE;
+                errx(EXIT_FAILURE, "Decrypted data size is larger than extracted data");
             }
 
             extension = args.no_extension ? NULL : strdup((char *)stego->data + stego->size);
@@ -173,8 +161,7 @@ int main(int argc, char *argv[])
 
         if (path == NULL)
         {
-            perror("Failed to write to output file");
-            return EXIT_FAILURE;
+            err(EXIT_FAILURE, "Failed to write to output file");
         }
 
         printf("Data extracted successfully to '%s'.\n", path);
