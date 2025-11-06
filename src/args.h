@@ -54,6 +54,8 @@ typedef struct Arguments
     CipherMode mode;
     // Password for encryption/decryption
     char *password;
+    // Do not restore original file extension when extracting
+    bool no_extension;
 } Arguments;
 
 /**

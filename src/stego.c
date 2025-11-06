@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
         LOG("BMP Header size: %u\n", header_size);
 
         char *extension = NULL;
-        Stego *stego = args.stego.retrieve(porter, header_size, args.ssl ? NULL : &extension);
+        Stego *stego = args.stego.retrieve(porter, header_size, args.ssl || args.no_extension ? NULL : &extension);
         fclose(porter);
 
         if (stego == NULL)
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
 
-            extension = strdup((char *)(plaintext + sizeof(uint32_t) + stego->size));
+            extension = args.no_extension ? NULL : strdup((char *)(plaintext + sizeof(uint32_t) + stego->size));
 
             LOG("Decrypted length: %zu bytes\n", extracted);
         }

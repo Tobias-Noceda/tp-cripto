@@ -41,7 +41,9 @@ static enum {
     // -m: Mode for block encryption/decryption
     ARGK_MODE = 'm',
     // -pass: Password for encryption/decryption
-    ARGK_PASSWORD = 'w'
+    ARGK_PASSWORD = 'w',
+    // -no-ext: Do not restore original file extension when extracting
+    ARGK_NO_EXTENSION = 'n'
 } ARGK __attribute__((unused));
 
 /**
@@ -101,6 +103,12 @@ static struct argp_option options[] = {
         .key = ARGK_PASSWORD,
         .arg = "PASSWORD",
         .doc = "Password for encryption/decryption",
+    },
+    {
+        .name = "no-ext",
+        .key = ARGK_NO_EXTENSION,
+        .arg = NULL,
+        .doc = "Extract file without restoring its original extension",
     },
     {0},
 };
@@ -210,6 +218,10 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
     case ARGK_PASSWORD:
         arguments->ssl = true;
         arguments->password = arg;
+        break;
+
+    case ARGK_NO_EXTENSION:
+        arguments->no_extension = true;
         break;
 
     case ARGP_KEY_ARG:
