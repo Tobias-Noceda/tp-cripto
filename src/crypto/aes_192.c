@@ -1,16 +1,13 @@
 #include "crypto.h"
 
-const EVP_CIPHER *get_aes_192_cipher(const CIPHER_MODES mode)
-{
-    const EVP_CIPHER *chiphers[] = {
-        EVP_aes_192_cbc(),
-        EVP_aes_192_ecb(),
-        EVP_aes_192_cfb8(),
-        EVP_aes_192_ofb(),
-    };
+static const CipherGetter chiphers[] = {
+    EVP_aes_192_cbc,
+    EVP_aes_192_ecb,
+    EVP_aes_192_cfb8,
+    EVP_aes_192_ofb,
+};
 
-    return chiphers[mode];
-}
+#define get_aes_192_cipher(mode) chiphers[mode]()
 
 size_t aes_192_encrypt(const uint8_t *plaintext, const size_t len, const char *pass, const CIPHER_MODES mode, uint8_t **ciphertext)
 {

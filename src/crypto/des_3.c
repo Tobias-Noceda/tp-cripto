@@ -1,16 +1,13 @@
 #include "crypto.h"
 
-const EVP_CIPHER *get_des_3_cipher(const CIPHER_MODES mode)
-{
-    const EVP_CIPHER *chiphers[] = {
-        EVP_des_ede3_cbc(),
-        EVP_des_ede3_ecb(),
-        EVP_des_ede3_cfb8(),
-        EVP_des_ede3_ofb(),        
-    };
+static const CipherGetter chiphers[] = {
+    EVP_des_ede3_cbc,
+    EVP_des_ede3_ecb,
+    EVP_des_ede3_cfb8,
+    EVP_des_ede3_ofb,
+};
 
-    return chiphers[mode];
-}
+#define get_des_3_cipher(mode) chiphers[mode]()
 
 size_t des_3_encrypt(const uint8_t *plaintext, const size_t len, const char *pass, const CIPHER_MODES mode, uint8_t **ciphertext)
 {

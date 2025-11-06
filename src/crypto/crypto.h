@@ -6,6 +6,8 @@
 #include <crypto.h>
 #include <logs.h>
 
+typedef EVP_CIPHER const *(*CipherGetter)();
+
 /**
  * @brief Encrypts the given plaintext using the specified cipher and password.
  * Uses OpenSSL EVP interface.
