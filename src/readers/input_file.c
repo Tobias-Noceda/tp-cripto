@@ -7,14 +7,21 @@
 #include <stego.h>
 #include <logs.h>
 
-Data get_message(const char *input, uint8_t **memory, size_t *length)
+struct Mapping
+{
+    // Big endian (network byte order) pointer to data size
+    uint32_t *size;
+    char *data;
+    char *ext;
+};
+
+size_t get_message(const char *input, uint8_t **memory)
 {
     FILE *file = fopen(input, "rb");
     if (file == NULL)
     {
         perror("Error opening input file");
-        *memory = NULL;
-        return (Data){};
+        return 0;
     }
 
     fseek(file, 0, SEEK_END);
@@ -24,11 +31,8 @@ Data get_message(const char *input, uint8_t **memory, size_t *length)
     if (file_size < 0)
     {
         perror("Error determining file size");
-
-        *memory = NULL;
         fclose(file);
-
-        return (Data){};
+        return 0;
     }
 
     // Extract file extension including the dot
@@ -38,43 +42,38 @@ Data get_message(const char *input, uint8_t **memory, size_t *length)
         dot = ""; // No extension found
     }
 
-    *length = sizeof(uint32_t) + file_size + strlen(dot) + 1;
-    *memory = malloc(*length); // 4 bytes for size, file data, extension, null terminator
+    size_t memory_length = sizeof(Stego) + file_size + strlen(dot) + 1;
+    *memory = malloc(memory_length); // 4 bytes for size, file data, extension, null terminator
     if (*memory == NULL)
     {
         perror("Memory allocation failed");
         fclose(file);
-        return (Data){};
+        return 0;
     }
 
-    Data input_data = {
-        .size = file_size,
-        .sizep = (uint32_t *)(*memory),
+    struct Mapping memory_map = {
+        .size = (uint32_t *)(*memory),
         .data = (char *)(*memory + sizeof(uint32_t)),
         .ext = (char *)(*memory + sizeof(uint32_t) + file_size),
     };
 
-    *input_data.sizep = htonl(input_data.size);
+    *memory_map.size = htonl(file_size);
 
-    size_t read_size = fread(input_data.data, 1, file_size, file);
+    size_t read_size = fread(memory_map.data, 1, file_size, file);
+    fclose(file);
+
     if (read_size != file_size)
     {
         perror("Error reading file");
-
         free(*memory);
-        *memory = NULL;
-        fclose(file);
-
-        return (Data){};
+        return 0;
     }
 
-    fclose(file);
+    strcpy(memory_map.ext, dot);
 
-    memcpy(input_data.ext, dot, strlen(dot) + 1); // Copy extension with null terminator
+    LOG("Input file size: %u bytes\n", (int)file_size);
+    LOG("Input file data: %.*s\n", (int)file_size, memory_map.data);
+    LOG("Input file extension: %s\n", memory_map.ext);
 
-    LOG("Input file size: %u bytes\n", input_data.size);
-    LOG("Input file data: %.*s\n", input_data.size, input_data.data);
-    LOG("Input file extension: %s\n", input_data.ext);
-
-    return input_data;
+    return memory_length;
 }
