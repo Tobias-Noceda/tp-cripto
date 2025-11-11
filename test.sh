@@ -4,6 +4,7 @@ fails=0
 
 for args in \
     "LSB1" \
+    "LSB1 AES128 CBC" \
     "LSB4" \
     "LSBI" \
     "LSBI 3DES CFB" \
