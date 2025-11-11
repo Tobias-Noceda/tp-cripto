@@ -7,6 +7,9 @@ bin/
 *.txt
 *.bmp
 *.png
+*.pdf
+*.wmv
+*.mp4
 !*.input.bmp
 !*.output.png
 
