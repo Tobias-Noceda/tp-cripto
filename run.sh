@@ -11,7 +11,7 @@ make clean all DEBUG=1
 extension=${msg##*.}
 if [ "$extension" = "$msg" ]; then
     extension=""
-else 
+else
     extension=".$extension"
 fi
 
