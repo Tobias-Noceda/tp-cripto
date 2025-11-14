@@ -71,7 +71,7 @@ size_t get_message(const char *input, uint8_t **memory)
 
     strcpy(memory_map.ext, dot);
 
-    LOG("Input file size: %u bytes\n", (int)file_size);
+    LOG("Input file size: %ld bytes\n", file_size);
     LOG("Input file data: %.*s\n", (int)file_size, memory_map.data);
     LOG("Input file extension: %s\n", memory_map.ext);
 
