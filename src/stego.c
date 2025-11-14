@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
             if (!tmp)
             {
                 free(memory);
+                free(ciphertext);
                 fclose(porter);
 
                 err(EXIT_FAILURE, "Memory reallocation failed");
