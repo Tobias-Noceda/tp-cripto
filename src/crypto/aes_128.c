@@ -1,6 +1,6 @@
 #include "crypto.h"
 
-static const CipherGetter chiphers[] = {
+static const CipherGetter ciphers[] = {
     EVP_aes_128_cbc,
     EVP_aes_128_ecb,
     EVP_aes_128_cfb8,
@@ -9,7 +9,7 @@ static const CipherGetter chiphers[] = {
 
 static inline const EVP_CIPHER *get_aes_128_cipher(const CIPHER_MODES mode)
 {
-    return chiphers[mode]();
+    return ciphers[mode]();
 }
 
 size_t aes_128_encrypt(const uint8_t *plaintext, const size_t len, const char *pass, const CIPHER_MODES mode, uint8_t **ciphertext)

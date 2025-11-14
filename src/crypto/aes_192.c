@@ -9,7 +9,7 @@ static const CipherGetter chiphers[] = {
 
 static inline const EVP_CIPHER *get_aes_192_cipher(const CIPHER_MODES mode)
 {
-    return chiphers[mode]();
+    return ciphers[mode]();
 }
 
 size_t aes_192_encrypt(const uint8_t *plaintext, const size_t len, const char *pass, const CIPHER_MODES mode, uint8_t **ciphertext)

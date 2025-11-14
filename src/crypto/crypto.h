@@ -23,7 +23,7 @@ typedef EVP_CIPHER const *(*CipherGetter)();
 size_t enc(const uint8_t *plaintext, const size_t len, const char *pass, const EVP_CIPHER *cipher, uint8_t **ciphertext);
 
 /**
- * @brief Encrypts the given plaintext using the specified cipher and password.
+ * @brief Decrypts the given ciphertext using the specified cipher and password.
  * Uses OpenSSL EVP interface.
  *
  * @param ciphertext The data to decrypt.
