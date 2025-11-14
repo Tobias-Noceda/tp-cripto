@@ -63,6 +63,14 @@ int main(int argc, char *argv[])
             size_t encrypted = args.algorithm.encrypt(memory, length, args.password, args.mode.val, &ciphertext);
             LOG("Encryption size: %zu\n", encrypted);
 
+            if (!encrypted)
+            {
+                free(memory);
+                fclose(porter);
+
+                err(EXIT_FAILURE, "Failed to encrypt data");
+            }
+
             Encrypted *tmp = realloc(memory, sizeof(Encrypted) + encrypted);
             if (!tmp)
             {
@@ -132,7 +140,7 @@ int main(int argc, char *argv[])
             const size_t extracted = args.algorithm.decrypt(stego->data, stego->size, args.password, args.mode.val, &plaintext);
             free(stego);
 
-            if (!plaintext)
+            if (extracted < sizeof(Stego))
             {
                 err(EXIT_FAILURE, "Failed to decrypt");
             }
