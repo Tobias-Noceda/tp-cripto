@@ -1,6 +1,6 @@
 #include "crypto.h"
 
-static const CipherGetter chiphers[] = {
+static const CipherGetter ciphers[] = {
     EVP_aes_256_cbc,
     EVP_aes_256_ecb,
     EVP_aes_256_cfb8,
