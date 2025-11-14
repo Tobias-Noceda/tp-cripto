@@ -31,8 +31,7 @@ The command mentions `[args]`, these will be specified in [next section](#progra
 > The program can only hide or uncover information.
 > 
 > Default encryption: AES128 in CBC mode.
->
-> File paths can be with or without "".
+
 
 ## Examples
 Bellow there´s a list of examples of commands that can be ran:
@@ -42,7 +41,7 @@ Bellow there´s a list of examples of commands that can be ran:
 ```
 - Embeding with encryption:
 ```bash
-./bin/stego -embed –in mensaje1.txt –p imagen1.bmp -out imagenmas1.bmp –steg LSBI –a
+./bin/stego -embed –in mensaje1.txt –p imagen1.bmp -out imagenmas1.bmp –steg LSB4 –a
 3des –m cbc -pass oculto
 ```
 - Extracting without encryption:
