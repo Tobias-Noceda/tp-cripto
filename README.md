@@ -4,7 +4,7 @@ This project implements three methods of steganography in files `.bmp` LSB1, LSB
 ## Compiling
 
 ```bash
-make all
+make all DEBUG=0
 ```
 
 ## Running
@@ -58,6 +58,11 @@ To read more examples run:
 ./examples.sh
 ```
 
+## Testing
+
+```bash
+make check DEBUG=0
+```
 
 ## Cleaning
 
