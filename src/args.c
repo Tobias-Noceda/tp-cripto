@@ -256,7 +256,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         if (arguments->ssl)
         {
             if (!arguments->password)
-                argp_error(state, "-password is required when using encryption.");
+                argp_error(state, "-pass is required when using encryption.");
 
             if (!arguments->algorithm.name)
                 arguments->algorithm = cipher_algorithms[DEFAULT];
