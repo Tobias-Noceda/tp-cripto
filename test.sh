@@ -5,6 +5,7 @@ pids=()
 for args in \
     "LSB1" \
     "LSB1 AES128 CBC" \
+    "LSB1 AES256 OFB" \
     "LSB4" \
     "LSBI" \
     "LSBI 3DES CFB" \
