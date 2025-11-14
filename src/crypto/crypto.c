@@ -64,13 +64,15 @@ static size_t ssl(const uint8_t *in, const size_t len, const char *pass, const E
         return CUSTOM_ERR(ctx, "Memory allocation failed");
 
     int output_length = 0;
-    if (!EVP_CipherUpdate(ctx, *out, &output_length, in, len)) {
+    if (!EVP_CipherUpdate(ctx, *out, &output_length, in, len))
+    {
         free(*out);
         return OPENSSL_ERR(ctx);
     }
 
     int padding_length = 0;
-    if (!EVP_CipherFinal_ex(ctx, *out + output_length, &padding_length)) {
+    if (!EVP_CipherFinal_ex(ctx, *out + output_length, &padding_length))
+    {
         free(*out);
         return OPENSSL_ERR(ctx);
     }

@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef struct {
+typedef struct
+{
     uint32_t size;
     uint8_t data[];
 } Stego;
