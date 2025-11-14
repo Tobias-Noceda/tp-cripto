@@ -21,9 +21,9 @@ if [ -n "$algo" ] && [ -n "$mode" ] && [ -n "$pass" ]; then
 fi
 
 echo =========================================================
-./bin/stego -embed -p $img -in $msg -out out.bmp -steg $stg $ssl
+./bin/stego -embed -p "$img" -in "$msg" -out out.bmp -steg "$stg" $ssl
 echo =========================================================
-./bin/stego -extract -p out.bmp -out extracted -steg $stg $ssl
+./bin/stego -extract -p out.bmp -out extracted -steg "$stg" $ssl
 
 echo
 diff $msg extracted$extension
