@@ -5,8 +5,9 @@ stego=$1
 algo=$2
 mode=$3
 
-out="runs/$$"
+out="runs/$BASHPID"
 
+enc=""
 if [ "$mode" ]
 then
     enc="${algo,,}${mode,,}"
