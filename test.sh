@@ -1,6 +1,6 @@
 #!/bin/bash
 
-fails=0
+pids=()
 
 for args in \
     "LSB1" \
@@ -10,11 +10,17 @@ for args in \
     "LSBI 3DES CFB" \
     "LSBI AES256 OFB"
 do
-    ./test-embed.sh $args || ((fails++)) &
-    ./test-extract.sh $args || ((fails++)) &
+    ./test-embed.sh $args &
+    pids+=($!)
+    ./test-extract.sh $args &
+    pids+=($!)
 done
 
-wait
+fails=0
+for pid in "${pids[@]}"
+do
+    wait $pid || ((fails++))
+done
 
 if [ $fails -ne 0 ]
 then
