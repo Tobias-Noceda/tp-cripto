@@ -33,4 +33,7 @@ check: all
 clean:
 	rm -rf $(OBJS) $(EXEC) ./bin ./runs
 
-.PHONY: all clean
+install:
+	chmod +x *.sh
+
+.PHONY: install all clean

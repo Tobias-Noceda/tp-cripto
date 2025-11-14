@@ -4,6 +4,7 @@ This project implements three methods of steganography in files `.bmp` LSB1, LSB
 ## Compiling
 
 ```bash
+make install
 make all DEBUG=0
 ```
 
