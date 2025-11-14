@@ -6,19 +6,23 @@ else
 CFLAGS += -O2
 endif
 
+ifneq ($(LOGS), 0)
+CFLAGS += -DVERBOSE
+endif
+
 ROOT = ./src
 
-SRCS = $(wildcard $(ROOT)/readers/*.c) $(wildcard $(ROOT)/writers/*.c) $(wildcard $(ROOT)/bmp/*.c) $(wildcard $(ROOT)/*.c)
+SRCS = $(wildcard $(ROOT)/crypto/*.c) $(wildcard $(ROOT)/readers/*.c) $(wildcard $(ROOT)/writers/*.c) $(wildcard $(ROOT)/bmp/*.c) $(wildcard $(ROOT)/*.c)
 HDRS = $(ROOT)/include
 
 OBJS = $(SRCS:.c=.o)
 
-EXEC = bin/stego
+EXEC = ./bin/stego
 
 all: $(EXEC)
 
 $(EXEC):
-	@mkdir -p bin
+	@mkdir -p ./bin
 	$(CC) $(SRCS) $(CFLAGS) -I$(HDRS) -o $@
 
 check: all
@@ -27,6 +31,6 @@ check: all
 	@echo "All tests done!"
 
 clean:
-	rm -f $(OBJS) $(EXEC)
+	rm -rf $(OBJS) $(EXEC) ./bin ./runs
 
 .PHONY: all clean

@@ -1,3 +1,6 @@
+#ifndef READERS_H
+#define READERS_H
+
 #include <stdio.h>
 
 #include <stego.h>
@@ -22,16 +25,13 @@ size_t get_output(FILE **file, const char *output, const char *input);
 /**
  * @brief Get the message data
  *
- * @note The caller is responsible for freeing the allocated memory. NOTHING but the memory pointer should be freed.
- * @note Data pointers will reference the allocated memory block.
- * @note Success or failure can be determined by checking memory being NULL or not.
+ * @note The caller is responsible for freeing the allocated memory.
  *
  * @param input The input file
  * @param memory Pointer to consecutive allocated memory
- * @param length Pointer to store the length of the data
- * @return Data The message data
+ * @return size_t The size of the allocated memory, or 0 on failure
  */
-Data get_message(const char *input, uint8_t **memory, size_t *length);
+size_t get_message(const char *input, uint8_t **memory);
 
 /**
  * @brief Retrieve a steganographed message using LSB1 method
@@ -62,3 +62,5 @@ Stego *retrieve_lsb4(FILE *file, size_t offset, char **extension);
  * @return Stego* The retrieved message
  */
 Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension);
+
+#endif

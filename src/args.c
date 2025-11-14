@@ -7,9 +7,11 @@
 #include <readers.h>
 #include <writers.h>
 
+#define DEFAULT 0
+
 /**
  * @brief argp option parser
- * 
+ *
  * @param key The option key
  * @param arg The option argument
  * @param state The argp state
@@ -33,7 +35,15 @@ static enum {
     // -in: Input file (file to embed)
     ARGK_INPUT = 'i',
     // -out: Output file (bmp when embedding, input file when extracting)
-    ARGK_OUTPUT = 'o'
+    ARGK_OUTPUT = 'o',
+    // -a: Algorithm for encryption/decryption
+    ARGK_ALGORITHM = 'a',
+    // -m: Mode for block encryption/decryption
+    ARGK_MODE = 'm',
+    // -pass: Password for encryption/decryption
+    ARGK_PASSWORD = 'w',
+    // -no-ext: Do not restore original file extension when extracting
+    ARGK_NO_EXTENSION = 'n'
 } ARGK __attribute__((unused));
 
 /**
@@ -76,6 +86,30 @@ static struct argp_option options[] = {
         .arg = "OUTPUT_FILE",
         .doc = "Output file (with .bmp extension when embedding, without extension when extracting)",
     },
+    {
+        .name = "a",
+        .key = ARGK_ALGORITHM,
+        .arg = "ALGORITHM",
+        .doc = "Select encryption/decryption algorithm (aes128, aes192, aes256, 3des)",
+    },
+    {
+        .name = "m",
+        .key = ARGK_MODE,
+        .arg = "MODE",
+        .doc = "Select cipher mode for encryption/decryption (CBC, ECB, CFB, OFB)",
+    },
+    {
+        .name = "pass",
+        .key = ARGK_PASSWORD,
+        .arg = "PASSWORD",
+        .doc = "Password for encryption/decryption",
+    },
+    {
+        .name = "no-ext",
+        .key = ARGK_NO_EXTENSION,
+        .arg = NULL,
+        .doc = "Extract file without restoring its original extension",
+    },
     {0},
 };
 
@@ -99,6 +133,40 @@ static StegoMethod get_stego_method(const char *name)
         if (!strcasecmp(stego_methods[i].name, name))
             return stego_methods[i];
     return stego_methods[i];
+}
+
+static const CipherAlgorithms cipher_algorithms[] = {
+    {"aes128", aes_128_encrypt, aes_128_decrypt},
+    {"aes192", aes_192_encrypt, aes_192_decrypt},
+    {"aes256", aes_256_encrypt, aes_256_decrypt},
+    {"3des", des_3_encrypt, des_3_decrypt},
+    {0},
+};
+
+static CipherAlgorithms get_cipher_algorithms(const char *name)
+{
+    size_t i;
+    for (i = 0; cipher_algorithms[i].name; i++)
+        if (!strcasecmp(cipher_algorithms[i].name, name))
+            return cipher_algorithms[i];
+    return cipher_algorithms[i];
+}
+
+static const CipherMode cipher_modes[] = {
+    {"cbc", CBC},
+    {"ecb", ECB},
+    {"cfb", CFB},
+    {"ofb", OFB},
+    {0},
+};
+
+static CipherMode get_cipher_mode(const char *name)
+{
+    size_t i;
+    for (i = 0; cipher_modes[i].name; i++)
+        if (!strcasecmp(cipher_modes[i].name, name))
+            return cipher_modes[i];
+    return cipher_modes[i];
 }
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
@@ -133,6 +201,29 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         arguments->output_path = arg;
         break;
 
+    case ARGK_ALGORITHM:
+        arguments->ssl = true;
+        arguments->algorithm = get_cipher_algorithms(arg);
+        if (!arguments->algorithm.name)
+            argp_error(state, "Invalid cipher algorithm. Available algorithms: aes128, aes192, aes256, 3des.");
+        break;
+
+    case ARGK_MODE:
+        arguments->ssl = true;
+        arguments->mode = get_cipher_mode(arg);
+        if (!arguments->mode.name)
+            argp_error(state, "Invalid cipher mode. Available modes: CBC, ECB, CFB, OFB.");
+        break;
+
+    case ARGK_PASSWORD:
+        arguments->ssl = true;
+        arguments->password = arg;
+        break;
+
+    case ARGK_NO_EXTENSION:
+        arguments->no_extension = true;
+        break;
+
     case ARGP_KEY_ARG:
         /* No positional arguments are expected */
         argp_usage(state);
@@ -160,6 +251,19 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
         if (!arguments->stego.name)
             argp_error(state, "-steg (LSB1 | LSB4 | LSBI) is required.");
+
+        // If ssl is enabled, all three must be defined
+        if (arguments->ssl)
+        {
+            if (!arguments->password)
+                argp_error(state, "-pass is required when using encryption.");
+
+            if (!arguments->algorithm.name)
+                arguments->algorithm = cipher_algorithms[DEFAULT];
+
+            if (!arguments->mode.name)
+                arguments->mode = cipher_modes[DEFAULT];
+        }
 
         break;
 
@@ -195,7 +299,8 @@ Arguments get_args(int argc, char *argv[])
         if (argv[i][0] == '-' && strlen(argv[i]) > 2 && argv[i][1] != '-')
         {
             argv[i] = prepend_dash(argv[i]);
-            if (!argv[i] || !push_ptr_list(&head, &tail, argv[i])) {
+            if (!argv[i] || !push_ptr_list(&head, &tail, argv[i]))
+            {
                 free(argv[i]); // free(NULL) is safe
                 free_ptr_list(head);
                 exit(EXIT_FAILURE);

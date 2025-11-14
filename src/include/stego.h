@@ -6,14 +6,6 @@
 
 typedef struct {
     uint32_t size;
-    // Big endian (network byte order) pointer to data size, preserved for legacy reasons
-    uint32_t *sizep;
-    char *data;
-    char *ext;
-} Data;
-
-typedef struct {
-    uint32_t size;
     uint8_t data[];
 } Stego;
 

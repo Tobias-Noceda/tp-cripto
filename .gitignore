@@ -2,7 +2,10 @@ obj/
 
 *.o
 *.bin
+*.log
 bin/
+runs/
+example*
 
 *.txt
 *.bmp
