@@ -34,6 +34,7 @@ clean:
 	rm -rf $(OBJS) $(EXEC) ./bin ./runs
 
 install:
+	chmod u+x stegobmp
 	chmod +x *.sh
 
 .PHONY: install all clean
