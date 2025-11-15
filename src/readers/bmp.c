@@ -43,5 +43,12 @@ size_t get_output(FILE **file, const char *output, const char *input)
     close(ifd);
 
     *file = fdopen(ofd, "r+b");
+    if (*file == NULL)
+    {
+        perror("Error converting file descriptor to FILE*");
+        close(ofd);
+        return 0;
+    }
+
     return stats.st_size;
 }

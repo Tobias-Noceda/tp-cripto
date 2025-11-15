@@ -1,7 +1,16 @@
-#include <stdint.h>
+#ifndef STEGO_H
+#define STEGO_H
 
-typedef struct {
+#include <stdint.h>
+#include <stdio.h>
+
+typedef struct
+{
     uint32_t size;
-    char *data;
-    char *ext;
-} Data;
+    uint8_t data[];
+} Stego;
+
+typedef size_t (*Writer)(FILE *output, const uint8_t *input, size_t size);
+typedef Stego *(*Reader)(FILE *file, size_t offset, char **extension);
+
+#endif

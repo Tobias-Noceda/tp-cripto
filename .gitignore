@@ -2,11 +2,19 @@ obj/
 
 *.o
 *.bin
-stego
+*.log
+bin/
+runs/
+example*
 
 *.txt
 *.bmp
+*.png
+*.pdf
+*.wmv
+*.mp4
 !*.input.bmp
+!*.output.png
 
 .idea/
 .vscode/

@@ -1,22 +1,27 @@
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 
-#include "../include/stego.h"
+#include <stego.h>
+#include <logs.h>
 
-Data get_message(const char *input)
+struct Mapping
 {
-    Data input_data = {
-        .size = 0,
-        .data = NULL,
-        .ext = NULL};
+    // Big endian (network byte order) pointer to data size
+    uint32_t *size;
+    char *data;
+    char *ext;
+};
 
+size_t get_message(const char *input, uint8_t **memory)
+{
     FILE *file = fopen(input, "rb");
     if (file == NULL)
     {
         perror("Error opening input file");
-        return (Data){};
+        return 0;
     }
 
     fseek(file, 0, SEEK_END);
@@ -27,59 +32,48 @@ Data get_message(const char *input)
     {
         perror("Error determining file size");
         fclose(file);
-        return (Data){};
+        return 0;
     }
-
-    input_data.data = malloc(file_size);
-    if (input_data.data == NULL)
-    {
-        perror("Memory allocation failed");
-        fclose(file);
-        return (Data){};
-    }
-
-    size_t read_size = fread(input_data.data, 1, file_size, file);
-    if (read_size != file_size)
-    {
-        perror("Error reading file");
-        free(input_data.data);
-        fclose(file);
-        return (Data){};
-    }
-
-    fclose(file);
-    input_data.size = (uint32_t)file_size;
 
     // Extract file extension including the dot
     const char *dot = strrchr(input, '.');
-    if (dot && dot != input)
+    if (!dot || dot == input)
     {
-        input_data.ext = strdup(dot);
-        if (input_data.ext == NULL)
-        {
-            perror("Memory allocation for extension failed");
-            free(input_data.data);
-            input_data.data = NULL;
-            input_data.size = 0;
-            return (Data){};
-        }
-    }
-    else
-    {
-        input_data.ext = strdup("");
-        if (input_data.ext == NULL)
-        {
-            perror("Memory allocation for extension failed");
-            free(input_data.data);
-            input_data.data = NULL;
-            input_data.size = 0;
-            return (Data){};
-        }
+        dot = ""; // No extension found
     }
 
-    printf("Input file size: %u bytes\n", input_data.size);
-    printf("Input file extension: %s\n", input_data.ext);
-    printf("Input file data: %.*s\n", input_data.size, input_data.data);
+    size_t memory_length = sizeof(Stego) + file_size + strlen(dot) + 1;
+    *memory = malloc(memory_length); // 4 bytes for size, file data, extension, null terminator
+    if (*memory == NULL)
+    {
+        perror("Memory allocation failed");
+        fclose(file);
+        return 0;
+    }
 
-    return input_data;
+    struct Mapping memory_map = {
+        .size = (uint32_t *)(*memory),
+        .data = (char *)(*memory + sizeof(uint32_t)),
+        .ext = (char *)(*memory + sizeof(uint32_t) + file_size),
+    };
+
+    *memory_map.size = htonl(file_size);
+
+    size_t read_size = fread(memory_map.data, 1, file_size, file);
+    fclose(file);
+
+    if (read_size != file_size)
+    {
+        perror("Error reading file");
+        free(*memory);
+        return 0;
+    }
+
+    strcpy(memory_map.ext, dot);
+
+    LOG("Input file size: %ld bytes\n", file_size);
+    LOG("Input file data: %.*s\n", (int)file_size, memory_map.data);
+    LOG("Input file extension: %s\n", memory_map.ext);
+
+    return memory_length;
 }

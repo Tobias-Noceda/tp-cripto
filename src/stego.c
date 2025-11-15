@@ -1,102 +1,181 @@
+#include "args.h"
+
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
+#include <err.h>
 
-#include "include/readers.h"
-#include "include/writers.h"
+#include <readers.h>
+#include <writers.h>
+#include <logs.h>
+#include <bmp.h>
+#include <crypto.h>
 
-#define BMP_HEADER_SIZE 128
+typedef struct
+{
+    uint32_t size;
+    uint8_t data[];
+} Encrypted;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
+    Arguments args = get_args(argc, argv);
 
-    const char *input_file_name = NULL;
-    const char *porter_file_name = NULL;
-    const char *output_file_name = NULL;
+    if (args.embed)
+    {
+        LOG("Embedding mode:\n");
+        LOG("Input file: %s\n", args.input_path);
+        LOG("Porter file: %s\n", args.porter_path);
+        LOG("Output file: %s\n", args.output_path);
+        LOG("Stego type: %s\n", args.stego.name);
 
-    if (argc < 7 || strcmp(argv[1], "-embed") != 0) {
-        fprintf(stderr, "Usage: %s -embed -in <input_file> -p <porter_file> -out <output_file>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-in") == 0 && i + 1 < argc) {
-            input_file_name = argv[++i];
-        } else if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
-            porter_file_name = argv[++i];
-        } else if (strcmp(argv[i], "-out") == 0 && i + 1 < argc) {
-            output_file_name = argv[++i];
+        FILE *porter;
+        long porter_size = get_output(&porter, args.output_path, args.porter_path);
+        if (porter_size == 0)
+        {
+            err(EXIT_FAILURE, "Failed to open porter file");
         }
-    }
 
-    if (input_file_name == NULL || porter_file_name == NULL || output_file_name == NULL) {
-        fprintf(stderr, "Input file, porter file, and output file must be specified.\n");
-        return EXIT_FAILURE;
-    }
+        const BITMAPFILEHEADER header = get_bmp_file_header(porter);
+        if (header.signature != 0x4D42)
+        {
+            fclose(porter);
+            errx(EXIT_FAILURE, "Porter file is not a valid BMP file");
+        }
 
-    FILE *porter;
-    long porter_size = get_output(&porter, output_file_name, porter_file_name);
-    if (porter_size == 0) {
-        perror("Failed to open porter file");
-        return EXIT_FAILURE;
-    }
+        uint32_t header_size = header.offset;
+        fseek(porter, header_size, SEEK_SET); // Skip BMP header
 
-    Data input_data = get_message(input_file_name);
-    if (input_data.data == NULL) {
+        uint8_t *memory;
+        size_t length = get_message(args.input_path, &memory);
+        if (!length)
+        {
+            fclose(porter);
+            err(EXIT_FAILURE, "Failed to get input message");
+        }
+
+        if (args.ssl)
+        {
+            uint8_t *ciphertext;
+            size_t encrypted = args.algorithm.encrypt(memory, length, args.password, args.mode.val, &ciphertext);
+            LOG("Encryption size: %zu\n", encrypted);
+
+            if (!encrypted)
+            {
+                free(memory);
+                fclose(porter);
+
+                err(EXIT_FAILURE, "Failed to encrypt data");
+            }
+
+            Encrypted *tmp = realloc(memory, sizeof(Encrypted) + encrypted);
+            if (!tmp)
+            {
+                free(memory);
+                free(ciphertext);
+                fclose(porter);
+
+                err(EXIT_FAILURE, "Memory reallocation failed");
+            }
+
+            tmp->size = htonl(encrypted);
+            memcpy(tmp->data, ciphertext, encrypted);
+
+            memory = (uint8_t *)tmp;
+            length = sizeof(Encrypted) + encrypted;
+
+            free(ciphertext);
+        }
+
+        if (!args.stego.embed(porter, memory, length))
+        {
+            free(memory);
+            fclose(porter);
+            errx(EXIT_FAILURE, "Failed to embed data");
+        }
+
+        free(memory);
         fclose(porter);
-        return EXIT_FAILURE;
-    }
-    if (input_data.ext == NULL) {
-        perror("File extension couldn't be determined");
-        free(input_data.data);
-        fclose(porter);
-        return EXIT_FAILURE;
-    }
-    if (input_data.size == 0) {
-        perror("Input file cannot be empty.");
-        free(input_data.data);
-        free(input_data.ext);
-        fclose(porter);
-        return EXIT_FAILURE;
-    }
 
-    fseek(porter, BMP_HEADER_SIZE, SEEK_SET); // Skip BMP header
-
-    // turn the size into 4 bytes
-    uint8_t size_bytes[4];
-    size_bytes[0] = (input_data.size >> 24) & 0xFF;
-    size_bytes[1] = (input_data.size >> 16) & 0xFF;
-    size_bytes[2] = (input_data.size >> 8) & 0xFF;
-    size_bytes[3] = input_data.size & 0xFF;
-
-    if (embed_data_lsb1(porter, size_bytes, 4) == 0) {
-        fprintf(stderr, "Failed to embed size data.\n");
-        free(input_data.data);
-        free(input_data.ext);
-        fclose(porter);
-        return EXIT_FAILURE;
+        printf("Data embedded successfully into '%s'.\n", args.output_path);
     }
-    if (embed_data_lsb1(porter, input_data.data, input_data.size) == 0) {
-        fprintf(stderr, "Failed to embed input data.\n");
-        free(input_data.data);
-        free(input_data.ext);
-        fclose(porter);
-        return EXIT_FAILURE;
-    }
-    if (embed_data_lsb1(porter, input_data.ext, strlen(input_data.ext) + 1) == 0) {
-        fprintf(stderr, "Failed to embed file extension data.\n");
-        free(input_data.data);
-        free(input_data.ext);
-        fclose(porter);
-        return EXIT_FAILURE;
-    }
+    else
+    {
+        LOG("Extracting mode:\n");
+        LOG("Porter file: %s\n", args.porter_path);
+        LOG("Output file: %s\n", args.output_path);
 
-    printf("Data embedded successfully into '%s'.\n", output_file_name);
+        FILE *porter = fopen(args.porter_path, "rb");
+        if (porter == NULL)
+        {
+            err(EXIT_FAILURE, "Error opening porter");
+        }
 
-    // free memory and close files
-    free(input_data.data);
-    free(input_data.ext);
-    fclose(porter);
+        const BITMAPFILEHEADER header = get_bmp_file_header(porter);
+        if (header.signature != 0x4D42)
+        {
+            fclose(porter);
+            errx(EXIT_FAILURE, "Porter file is not a valid BMP file");
+        }
+
+        const uint32_t header_size = header.offset;
+        LOG("BMP Header size: %u\n", header_size);
+
+        char *extension = NULL;
+        Stego *stego = args.stego.retrieve(porter, header_size, args.ssl || args.no_extension ? NULL : &extension);
+        fclose(porter);
+
+        if (stego == NULL)
+        {
+            free(extension);
+            errx(EXIT_FAILURE, "Failed to retrieve stego data");
+        }
+
+        if (args.ssl)
+        {
+            uint8_t *plaintext = NULL;
+            const size_t extracted = args.algorithm.decrypt(stego->data, stego->size, args.password, args.mode.val, &plaintext);
+            free(stego);
+
+            if (extracted < sizeof(Stego))
+            {
+                err(EXIT_FAILURE, "Failed to decrypt");
+            }
+
+            stego = (Stego *)plaintext;
+            stego->size = ntohl(stego->size);
+            LOG("Decrypted data size: %u bytes\n", stego->size);
+
+            if (stego->size > extracted - sizeof(uint32_t))
+            {
+                free(stego);
+                errx(EXIT_FAILURE, "Decrypted data size is larger than extracted data");
+            }
+
+            extension = args.no_extension ? NULL : strdup((char *)stego->data + stego->size);
+
+            LOG("Decrypted length: %zu bytes\n", extracted);
+        }
+
+        LOG("Extracted data size: %u bytes\n", stego->size);
+        LOG("Extracted data %.*s\n", stego->size, stego->data);
+        LOG("Extracted data extension: %s\n", extension);
+
+        char *path = set_output(args.output_path, extension, stego->data, stego->size);
+        free(extension);
+        free(stego);
+
+        if (path == NULL)
+        {
+            err(EXIT_FAILURE, "Failed to write to output file");
+        }
+
+        printf("Data extracted successfully to '%s'.\n", path);
+        free(path);
+    }
 
     return EXIT_SUCCESS;
 }
