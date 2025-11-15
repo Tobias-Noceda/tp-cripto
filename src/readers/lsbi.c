@@ -13,7 +13,6 @@
 #define LSB(x, n) ((x) & ((1 << (n)) - 1))
 #define GET_BYTES_NEEDED(x) (((x) * 3 + 1) / 2)
 
-
 Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
 {
     if (fseek(file, offset, SEEK_SET) < 0)
@@ -25,14 +24,14 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
     int pattern[PATTERN_SIZE] = {0};
 
     uint8_t pattern_bytes[PATTERN_SIZE];
-    
+
     if (fread(pattern_bytes, sizeof(uint8_t), PATTERN_SIZE, file) != PATTERN_SIZE)
     {
         perror("Not enough bytes to read pattern");
         return NULL;
     }
 
-    for(int i = 0 ; i < PATTERN_SIZE ; i++)
+    for (int i = 0; i < PATTERN_SIZE; i++)
     {
         pattern[i] = pattern_bytes[i] & 1;
         LOG("Pattern %d inversion: %d\n", i, pattern[i]);
@@ -56,7 +55,7 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
 
     uint32_t message_length = 0;
     size_t bits_read = 0;
-    for (int i = 0 ; i < bytes_needed && bits_read < bits_needed ; i++)
+    for (int i = 0; i < bytes_needed && bits_read < bits_needed; i++)
     {
         if (i % 3 != 1) // not R
         {
@@ -93,7 +92,8 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
     while (bits_collected < total_bits)
     {
         char byte = 0;
-        do {
+        do
+        {
             byte = fgetc(file);
             if (feof(file))
             {
@@ -157,7 +157,7 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
                 uint8_t last3 = LSB(image_byte, 3);
                 int pattern_index = last3 >> 1;
                 uint8_t bit = (last3 & 1) ^ pattern[pattern_index];
-                
+
                 ext_byte = (ext_byte << 1) | bit;
             }
 
@@ -166,6 +166,6 @@ Stego *retrieve_lsbi(FILE *file, size_t offset, char **extension)
 
         } while (ext_byte != 0);
     }
- 
+
     return stego;
 }

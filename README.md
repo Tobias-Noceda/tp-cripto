@@ -4,13 +4,14 @@ This project implements three methods of steganography in files `.bmp` LSB1, LSB
 ## Compiling
 
 ```bash
-make all
+make install
+make all DEBUG=0
 ```
 
 ## Running
 The command mentions `[args]`, these will be specified in [next section](#program-arguments).
 ```bash
-./bin/stego [args]
+./stegobmp [args]
 ```
 
 ## Program arguments
@@ -37,20 +38,19 @@ The command mentions `[args]`, these will be specified in [next section](#progra
 Bellow there´s a list of examples of commands that can be ran:
 - Embeding without encryption:
 ```bash
-./bin/stego -embed –in "mensaje1.txt" –p "imagen1.bmp" -out "imagenmas1.bmp" –steg LSBI
+./stegobmp -embed –in "mensaje1.txt" –p "imagen1.bmp" -out "imagenmas1.bmp" –steg LSBI
 ```
 - Embeding with encryption:
 ```bash
-./bin/stego -embed –in mensaje1.txt –p imagen1.bmp -out imagenmas1.bmp –steg LSB4 –a
-3des –m cbc -pass oculto
+./stegobmp -embed –in mensaje1.txt –p imagen1.bmp -out imagenmas1.bmp –steg LSB4 –a 3des –m cbc -pass oculto
 ```
 - Extracting without encryption:
 ```bash
-./bin/stego -extract -p files/lado.input.bmp -out example.bmp -steg LSB1
+./stegobmp -extract -p files/lado.input.bmp -out example.bmp -steg LSB1
 ```
 - Extracting with encryption:
 ```bash
-./bin/stego –extract –p "imagenmas1.bmp" -out "mensaje1" –steg LSBI –a 3des –m cbc -pass
+./stegobmp –extract –p "imagenmas1.bmp" -out "mensaje1" –steg LSBI –a 3des –m cbc -pass
 "oculto"
 ```
 To read more examples run:
@@ -58,6 +58,11 @@ To read more examples run:
 ./examples.sh
 ```
 
+## Testing
+
+```bash
+make check DEBUG=0
+```
 
 ## Cleaning
 
